@@ -14,10 +14,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "example git repo"
+    "url": "https://github.com/mikaello/rankinglop-resultlist-generator.git"
   },
   "bugs": {
-    "url": "https://github.com/mikaello/emit-punch-cards-communication/issues"
+    "url": "https://github.com/mikaello/rankinglop-resultlist-generator/issues"
   },
   "homepage": "",
   "keywords": [
