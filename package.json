@@ -1,0 +1,34 @@
+{
+  "name": "rankinglop-resultlist-generator",
+  "version": "1.0.0",
+  "description": "Generate old school HTML file when given an IOF v3 XML file",
+  "main": "dist/index.js",
+  "module": "dist/index.js",
+  "type": "module",
+  "dependencies": {
+    "typescript": "^4.4.3"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "example git repo"
+  },
+  "bugs": {
+    "url": "https://github.com/mikaello/emit-punch-cards-communication/issues"
+  },
+  "homepage": "",
+  "keywords": [
+    "iof",
+    "orienteering",
+    "rankingløp"
+  ],
+  "author": "mikaello",
+  "license": "GPL-3.0",
+  "prettier": {
+    "trailingComma": "all",
+    "proseWrap": "always"
+  }
+}
