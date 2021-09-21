@@ -1,6 +1,11 @@
 import { ResultList } from "./model";
 
+import { JSDOM } from "jsdom";
+
 type ResultListOptions = {
+  /** Title for this race */
+  title?: String;
+
   /** Which map was used, e.g. "Sognsvann" */
   map?: String;
 
@@ -30,5 +35,22 @@ export const createResultList = (
   resultList: ResultList,
   options: ResultListOptions,
 ) => {
+  const dom = new JSDOM(
+    `<!DOCTYPE html><html><head><meta HTTP-EQUIV="Content-Type" content="text/html; charset=UTF-8"></head><body></body></html>`,
+  );
+  //
+
+  dom.window.document.title = "Rankingløp";
+
+  console.log(dom.window.document);
+
+  console.log(dom.serialize());
+
   return "";
 };
+
+createResultList({}, {});
+
+console.log("hei");
+
+const createResultListHeader = (options: ResultListOptions) => {};
