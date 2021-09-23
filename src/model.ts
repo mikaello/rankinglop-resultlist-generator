@@ -1,6 +1,6 @@
 /**
  * Eventor API
- * Eventor API 
+ * Eventor API
  *
  * The version of the OpenAPI document: 1.0.0
  *
@@ -11,849 +11,835 @@
  */
 
 export interface Account {
-    value?: string;
-    type?: string;
+  value?: string;
+  type?: string;
 }
 
 export interface Address {
-    careOf?: string;
-    street?: string;
-    zipCode?: string;
-    city?: string;
-    state?: string;
-    country?: Nationality;
-    type?: string;
-    modifyTime?: number;
+  careOf?: string;
+  street?: string;
+  zipCode?: string;
+  city?: string;
+  state?: string;
+  country?: Nationality;
+  type?: string;
+  modifyTime?: number;
 }
 
 export interface Amount {
-    value?: number;
-    currency?: string;
+  value?: number;
+  currency?: string;
 }
 
 export interface AssignedFee {
-    fee?: Fee;
-    paidAmount?: Amount;
-    extensions?: Extensions;
-    modifyTime?: number;
+  fee?: Fee;
+  paidAmount?: Amount;
+  extensions?: Extensions;
+  modifyTime?: number;
 }
 
 export interface ClassList {
-    iofVersion?: string;
-    createTime?: number;
-    creator?: string;
-    clazz?: Array<Clazz>;
-    extensions?: Extensions;
+  iofVersion?: string;
+  createTime?: number;
+  creator?: string;
+  clazz?: Array<Clazz>;
+  extensions?: Extensions;
 }
 
 export interface Clazz {
-    id?: Id;
-    name?: string;
-    shortName?: string;
-    classType?: Array<ClazzClassType>;
-    leg?: Array<ClazzLeg>;
-    teamFee?: Array<Fee>;
-    fee?: Array<Fee>;
-    status?: ClazzStatusEnum;
-    raceClass?: Array<ClazzRaceClass>;
-    tooFewEntriesSubstituteClass?: Clazz;
-    tooManyEntriesSubstituteClass?: Clazz;
-    extensions?: Extensions;
-    minAge?: number;
-    maxAge?: number;
-    sex?: string;
-    minNumberOfTeamMembers?: number;
-    maxNumberOfTeamMembers?: number;
-    minTeamAge?: number;
-    maxTeamAge?: number;
-    numberOfCompetitors?: number;
-    maxNumberOfCompetitors?: number;
-    resultListMode?: string;
-    modifyTime?: number;
+  id?: Id;
+  name?: string;
+  shortName?: string;
+  classType?: Array<ClazzClassType>;
+  leg?: Array<ClazzLeg>;
+  teamFee?: Array<Fee>;
+  fee?: Array<Fee>;
+  status?: ClazzStatusEnum;
+  raceClass?: Array<ClazzRaceClass>;
+  tooFewEntriesSubstituteClass?: Clazz;
+  tooManyEntriesSubstituteClass?: Clazz;
+  extensions?: Extensions;
+  minAge?: number;
+  maxAge?: number;
+  sex?: string;
+  minNumberOfTeamMembers?: number;
+  maxNumberOfTeamMembers?: number;
+  minTeamAge?: number;
+  maxTeamAge?: number;
+  numberOfCompetitors?: number;
+  maxNumberOfCompetitors?: number;
+  resultListMode?: string;
+  modifyTime?: number;
 }
 
 export type ClazzStatusEnum =
-    | "NORMAL"
-    | "DIVIDED"
-    | "JOINED"
-    | "INVALIDATED"
-    | "INVALIDATED_NO_FEE";
+  | "NORMAL"
+  | "DIVIDED"
+  | "JOINED"
+  | "INVALIDATED"
+  | "INVALIDATED_NO_FEE";
 
 export const ClazzStatusEnumValues: ClazzStatusEnum[] = [
-    "NORMAL",
-    "DIVIDED",
-    "JOINED",
-    "INVALIDATED",
-    "INVALIDATED_NO_FEE",
+  "NORMAL",
+  "DIVIDED",
+  "JOINED",
+  "INVALIDATED",
+  "INVALIDATED_NO_FEE",
 ];
 
 export interface ClazzClassType {
-    id?: Id;
-    name?: string;
-    modifyTime?: number;
+  id?: Id;
+  name?: string;
+  modifyTime?: number;
 }
 
 export interface ClazzLeg {
-    name?: string;
-    extensions?: Extensions;
-    minNumberOfCompetitors?: number;
-    maxNumberOfCompetitors?: number;
+  name?: string;
+  extensions?: Extensions;
+  minNumberOfCompetitors?: number;
+  maxNumberOfCompetitors?: number;
 }
 
 export interface ClazzRaceClass {
-    punchingSystem?: Array<string>;
-    teamFee?: Array<Fee>;
-    fee?: Array<Fee>;
-    firstStart?: number;
-    status?: ClazzRaceClassStatusEnum;
-    course?: Array<SimpleCourse>;
-    onlineControl?: Array<OnlineControl>;
-    extensions?: Extensions;
-    raceNumber?: number;
-    maxNumberOfCompetitors?: number;
-    modifyTime?: number;
+  punchingSystem?: Array<string>;
+  teamFee?: Array<Fee>;
+  fee?: Array<Fee>;
+  firstStart?: number;
+  status?: ClazzRaceClassStatusEnum;
+  course?: Array<SimpleCourse>;
+  onlineControl?: Array<OnlineControl>;
+  extensions?: Extensions;
+  raceNumber?: number;
+  maxNumberOfCompetitors?: number;
+  modifyTime?: number;
 }
 
 export type ClazzRaceClassStatusEnum =
-    | "START_TIMES_NOT_ALLOCATED"
-    | "START_TIMES_ALLOCATED"
-    | "NOT_USED"
-    | "COMPLETED"
-    | "INVALIDATED"
-    | "INVALIDATED_NO_FEE";
+  | "START_TIMES_NOT_ALLOCATED"
+  | "START_TIMES_ALLOCATED"
+  | "NOT_USED"
+  | "COMPLETED"
+  | "INVALIDATED"
+  | "INVALIDATED_NO_FEE";
 
 export const ClazzRaceClassStatusEnumValues: ClazzRaceClassStatusEnum[] = [
-    "START_TIMES_NOT_ALLOCATED",
-    "START_TIMES_ALLOCATED",
-    "NOT_USED",
-    "COMPLETED",
-    "INVALIDATED",
-    "INVALIDATED_NO_FEE",
+  "START_TIMES_NOT_ALLOCATED",
+  "START_TIMES_ALLOCATED",
+  "NOT_USED",
+  "COMPLETED",
+  "INVALIDATED",
+  "INVALIDATED_NO_FEE",
 ];
 
 export interface Competitor {
-    person?: Person;
-    organisation?: Array<Organisation>;
-    controlCard?: Array<ControlCard>;
-    clazz?: Array<Clazz>;
-    score?: Array<Score>;
-    extensions?: Extensions;
-    modifyTime?: number;
+  person?: Person;
+  organisation?: Array<Organisation>;
+  controlCard?: Array<ControlCard>;
+  clazz?: Array<Clazz>;
+  score?: Array<Score>;
+  extensions?: Extensions;
+  modifyTime?: number;
 }
 
 export interface CompetitorCount {
-    eventId?: string;
-    numberOfEntries?: number;
-    numberOfStarts?: number;
-    organisationCompetitorCount?: OrganisationCompetitorCount;
+  eventId?: string;
+  numberOfEntries?: number;
+  numberOfStarts?: number;
+  organisationCompetitorCount?: OrganisationCompetitorCount;
 }
 
 export interface CompetitorList {
-    iofVersion?: string;
-    createTime?: number;
-    creator?: string;
-    competitor?: Array<Competitor>;
-    extensions?: Extensions;
+  iofVersion?: string;
+  createTime?: number;
+  creator?: string;
+  competitor?: Array<Competitor>;
+  extensions?: Extensions;
 }
 
 export interface Contact {
-    value?: string;
-    type?: string;
-    modifyTime?: number;
+  value?: string;
+  type?: string;
+  modifyTime?: number;
 }
 
 export interface ControlAnswer {
-    answer?: string;
-    correctAnswer?: string;
-    time?: number;
-    extensions?: Extensions;
+  answer?: string;
+  correctAnswer?: string;
+  time?: number;
+  extensions?: Extensions;
 }
 
 export interface ControlCard {
-    value?: string;
-    punchingSystem?: string;
-    modifyTime?: number;
+  value?: string;
+  punchingSystem?: string;
+  modifyTime?: number;
 }
 
 export interface ControlCardList {
-    iofVersion?: string;
-    createTime?: number;
-    creator?: string;
-    owner?: string;
-    controlCard?: Array<ControlCard>;
-    extensions?: Extensions;
+  iofVersion?: string;
+  createTime?: number;
+  creator?: string;
+  owner?: string;
+  controlCard?: Array<ControlCard>;
+  extensions?: Extensions;
 }
 
 export interface Course {
-    id?: Id;
-    name?: string;
-    courseFamily?: string;
-    length?: number;
-    climb?: number;
-    courseControl?: Array<CourseCourseControl>;
-    mapId?: number;
-    extensions?: Extensions;
-    numberOfCompetitors?: number;
-    modifyTime?: number;
+  id?: Id;
+  name?: string;
+  courseFamily?: string;
+  length?: number;
+  climb?: number;
+  courseControl?: Array<CourseCourseControl>;
+  mapId?: number;
+  extensions?: Extensions;
+  numberOfCompetitors?: number;
+  modifyTime?: number;
 }
 
 export interface CourseCourseControl {
-    control?: Array<string>;
-    mapText?: string;
-    mapTextPosition?: MapPosition;
-    legLength?: number;
-    score?: number;
-    extensions?: Extensions;
-    type?: CourseCourseControlTypeEnum;
-    randomOrder?: boolean;
-    specialInstruction?: string;
-    tapedRouteLength?: number;
-    modifyTime?: number;
+  control?: Array<string>;
+  mapText?: string;
+  mapTextPosition?: MapPosition;
+  legLength?: number;
+  score?: number;
+  extensions?: Extensions;
+  type?: CourseCourseControlTypeEnum;
+  randomOrder?: boolean;
+  specialInstruction?: string;
+  tapedRouteLength?: number;
+  modifyTime?: number;
 }
 
 export type CourseCourseControlTypeEnum =
-    | "CONTROL"
-    | "START"
-    | "FINISH"
-    | "CROSSING_POINT"
-    | "END_OF_MARKED_ROUTE";
+  | "CONTROL"
+  | "START"
+  | "FINISH"
+  | "CROSSING_POINT"
+  | "END_OF_MARKED_ROUTE";
 
-export const CourseCourseControlTypeEnumValues: CourseCourseControlTypeEnum[] = [
-    "CONTROL",
-    "START",
-    "FINISH",
-    "CROSSING_POINT",
-    "END_OF_MARKED_ROUTE",
-];
+export const CourseCourseControlTypeEnumValues: CourseCourseControlTypeEnum[] =
+  ["CONTROL", "START", "FINISH", "CROSSING_POINT", "END_OF_MARKED_ROUTE"];
 
 export interface CourseData {
-    iofVersion?: string;
-    createTime?: number;
-    creator?: string;
-    event?: Event;
-    raceCourseData?: Array<CourseDataRaceCourseData>;
-    extensions?: Extensions;
+  iofVersion?: string;
+  createTime?: number;
+  creator?: string;
+  event?: Event;
+  raceCourseData?: Array<CourseDataRaceCourseData>;
+  extensions?: Extensions;
 }
 
 export interface CourseDataClassCourseAssignment {
-    classId?: Id;
-    className?: string;
-    allowedOnLeg?: Array<number>;
-    courseName?: string;
-    courseFamily?: string;
-    extensions?: Extensions;
-    numberOfCompetitors?: number;
+  classId?: Id;
+  className?: string;
+  allowedOnLeg?: Array<number>;
+  courseName?: string;
+  courseFamily?: string;
+  extensions?: Extensions;
+  numberOfCompetitors?: number;
 }
 
 export interface CourseDataMap {
-    id?: Id;
-    image?: Logotype;
-    scale?: number;
-    mapPositionTopLeft?: MapPosition;
-    mapPositionBottomRight?: MapPosition;
-    extensions?: Extensions;
+  id?: Id;
+  image?: Logotype;
+  scale?: number;
+  mapPositionTopLeft?: MapPosition;
+  mapPositionBottomRight?: MapPosition;
+  extensions?: Extensions;
 }
 
 export interface CourseDataPersonCourseAssignment {
-    entryId?: Id;
-    bibNumber?: string;
-    personName?: string;
-    className?: string;
-    courseName?: string;
-    courseFamily?: string;
-    extensions?: Extensions;
+  entryId?: Id;
+  bibNumber?: string;
+  personName?: string;
+  className?: string;
+  courseName?: string;
+  courseFamily?: string;
+  extensions?: Extensions;
 }
 
 export interface CourseDataRaceCourseData {
-    map?: Array<CourseDataMap>;
-    control?: Array<OnlineControl>;
-    course?: Array<Course>;
-    classCourseAssignment?: Array<CourseDataClassCourseAssignment>;
-    personCourseAssignment?: Array<CourseDataPersonCourseAssignment>;
-    teamCourseAssignment?: Array<CourseDataTeamCourseAssignment>;
-    extensions?: Extensions;
-    raceNumber?: number;
+  map?: Array<CourseDataMap>;
+  control?: Array<OnlineControl>;
+  course?: Array<Course>;
+  classCourseAssignment?: Array<CourseDataClassCourseAssignment>;
+  personCourseAssignment?: Array<CourseDataPersonCourseAssignment>;
+  teamCourseAssignment?: Array<CourseDataTeamCourseAssignment>;
+  extensions?: Extensions;
+  raceNumber?: number;
 }
 
 export interface CourseDataTeamCourseAssignment {
-    bibNumber?: string;
-    teamName?: string;
-    className?: string;
-    teamMemberCourseAssignment?: Array<CourseDataTeamMemberCourseAssignment>;
-    extensions?: Extensions;
+  bibNumber?: string;
+  teamName?: string;
+  className?: string;
+  teamMemberCourseAssignment?: Array<CourseDataTeamMemberCourseAssignment>;
+  extensions?: Extensions;
 }
 
 export interface CourseDataTeamMemberCourseAssignment {
-    entryId?: Id;
-    bibNumber?: string;
-    leg?: number;
-    legOrder?: number;
-    teamMemberName?: string;
-    courseName?: string;
-    courseFamily?: string;
-    extensions?: Extensions;
+  entryId?: Id;
+  bibNumber?: string;
+  leg?: number;
+  legOrder?: number;
+  teamMemberName?: string;
+  courseName?: string;
+  courseFamily?: string;
+  extensions?: Extensions;
 }
 
 export interface DateTime {
-    date?: number;
-    time?: number;
+  date?: number;
+  time?: number;
 }
 
 export interface EntryList {
-    iofVersion?: string;
-    createTime?: number;
-    creator?: string;
-    event?: Event;
-    teamEntry?: Array<EntryListTeamEntry>;
-    personEntry?: Array<EntryListPersonEntry>;
-    extensions?: Extensions;
+  iofVersion?: string;
+  createTime?: number;
+  creator?: string;
+  event?: Event;
+  teamEntry?: Array<EntryListTeamEntry>;
+  personEntry?: Array<EntryListPersonEntry>;
+  extensions?: Extensions;
 }
 
 export interface EntryListPersonEntry {
-    id?: Id;
-    person?: Person;
-    organisation?: Organisation;
-    controlCard?: Array<ControlCard>;
-    score?: Array<Score>;
-    clazz?: Array<Clazz>;
-    raceNumber?: Array<number>;
-    assignedFee?: Array<AssignedFee>;
-    serviceRequest?: Array<ServiceRequest>;
-    startTimeAllocationRequest?: StartTimeAllocationRequest;
-    entryTime?: number;
-    extensions?: Extensions;
-    modifyTime?: number;
+  id?: Id;
+  person?: Person;
+  organisation?: Organisation;
+  controlCard?: Array<ControlCard>;
+  score?: Array<Score>;
+  clazz?: Array<Clazz>;
+  raceNumber?: Array<number>;
+  assignedFee?: Array<AssignedFee>;
+  serviceRequest?: Array<ServiceRequest>;
+  startTimeAllocationRequest?: StartTimeAllocationRequest;
+  entryTime?: number;
+  extensions?: Extensions;
+  modifyTime?: number;
 }
 
 export interface EntryListTeamEntry {
-    id?: Id;
-    name?: string;
-    organisation?: Array<Organisation>;
-    teamEntryPerson?: Array<EntryListTeamEntryPerson>;
-    clazz?: Array<Clazz>;
-    race?: Array<number>;
-    assignedFee?: Array<AssignedFee>;
-    serviceRequest?: Array<ServiceRequest>;
-    startTimeAllocationRequest?: StartTimeAllocationRequest;
-    contactInformation?: string;
-    entryTime?: number;
-    extensions?: Extensions;
-    modifyTime?: number;
+  id?: Id;
+  name?: string;
+  organisation?: Array<Organisation>;
+  teamEntryPerson?: Array<EntryListTeamEntryPerson>;
+  clazz?: Array<Clazz>;
+  race?: Array<number>;
+  assignedFee?: Array<AssignedFee>;
+  serviceRequest?: Array<ServiceRequest>;
+  startTimeAllocationRequest?: StartTimeAllocationRequest;
+  contactInformation?: string;
+  entryTime?: number;
+  extensions?: Extensions;
+  modifyTime?: number;
 }
 
 export interface EntryListTeamEntryPerson {
-    person?: Person;
-    organisation?: Organisation;
-    leg?: number;
-    legOrder?: number;
-    controlCard?: Array<ControlCard>;
-    score?: Array<Score>;
-    assignedFee?: Array<AssignedFee>;
-    extensions?: Extensions;
+  person?: Person;
+  organisation?: Organisation;
+  leg?: number;
+  legOrder?: number;
+  controlCard?: Array<ControlCard>;
+  score?: Array<Score>;
+  assignedFee?: Array<AssignedFee>;
+  extensions?: Extensions;
 }
 
 export interface Event {
-    id?: Id;
-    name?: string;
-    startTime?: Date;
-    endTime?: Date;
-    status?: EventStatusEnum;
-    classification?: EventClassificationEnum;
-    form?: Array<EventFormEnum>;
-    organiser?: Array<Organisation>;
-    official?: Array<Role>;
-    clazz?: Array<Clazz>;
-    race?: Array<EventRace>;
-    entryReceiver?: EventEntryReceiver;
-    service?: Array<Service>;
-    account?: Array<Account>;
-    url?: Array<Url>;
-    information?: Array<Information>;
-    schedule?: Array<EventSchedule>;
-    news?: Array<Information>;
-    extensions?: Extensions;
-    modifyTime?: number;
+  id?: Id;
+  name?: string;
+  startTime?: DateTime;
+  endTime?: DateTime;
+  status?: EventStatusEnum;
+  classification?: EventClassificationEnum;
+  form?: Array<EventFormEnum>;
+  organiser?: Array<Organisation>;
+  official?: Array<Role>;
+  clazz?: Array<Clazz>;
+  race?: Array<EventRace>;
+  entryReceiver?: EventEntryReceiver;
+  service?: Array<Service>;
+  account?: Array<Account>;
+  url?: Array<Url>;
+  information?: Array<Information>;
+  schedule?: Array<EventSchedule>;
+  news?: Array<Information>;
+  extensions?: Extensions;
+  modifyTime?: number;
 }
 
 export type EventStatusEnum =
-    | "PLANNED"
-    | "APPLIED"
-    | "PROPOSED"
-    | "SANCTIONED"
-    | "CANCELED"
-    | "RESCHEDULED";
+  | "PLANNED"
+  | "APPLIED"
+  | "PROPOSED"
+  | "SANCTIONED"
+  | "CANCELED"
+  | "RESCHEDULED";
 
 export const EventStatusEnumValues: EventStatusEnum[] = [
-    "PLANNED",
-    "APPLIED",
-    "PROPOSED",
-    "SANCTIONED",
-    "CANCELED",
-    "RESCHEDULED",
+  "PLANNED",
+  "APPLIED",
+  "PROPOSED",
+  "SANCTIONED",
+  "CANCELED",
+  "RESCHEDULED",
 ];
 
 export type EventClassificationEnum =
-    | "INTERNATIONAL"
-    | "NATIONAL"
-    | "REGIONAL"
-    | "LOCAL"
-    | "CLUB";
+  | "INTERNATIONAL"
+  | "NATIONAL"
+  | "REGIONAL"
+  | "LOCAL"
+  | "CLUB";
 
 export const EventClassificationEnumValues: EventClassificationEnum[] = [
-    "INTERNATIONAL",
-    "NATIONAL",
-    "REGIONAL",
-    "LOCAL",
-    "CLUB",
+  "INTERNATIONAL",
+  "NATIONAL",
+  "REGIONAL",
+  "LOCAL",
+  "CLUB",
 ];
 
-export type EventFormEnum =
-    | "INDIVIDUAL"
-    | "TEAM"
-    | "RELAY";
+export type EventFormEnum = "INDIVIDUAL" | "TEAM" | "RELAY";
 
 export const EventFormEnumValues: EventFormEnum[] = [
-    "INDIVIDUAL",
-    "TEAM",
-    "RELAY",
+  "INDIVIDUAL",
+  "TEAM",
+  "RELAY",
 ];
 
 export interface EventDocument {
-    id?: string;
-    /**
-     * The event ID this document belongs to
-     */
-    referenceId?: string;
-    /**
-     * Name of document
-     */
-    name?: string;
-    url?: string;
-    type?: EventDocumentType;
-    modifyDate?: string;
+  id?: string;
+  /**
+   * The event ID this document belongs to
+   */
+  referenceId?: string;
+  /**
+   * Name of document
+   */
+  name?: string;
+  url?: string;
+  type?: EventDocumentType;
+  modifyDate?: string;
 }
 
-export type EventDocumentType =
-    | "Invitation"
-    | "Other";
+export type EventDocumentType = "Invitation" | "Other";
 
 export const EventDocumentTypeValues: EventDocumentType[] = [
-    "Invitation",
-    "Other",
+  "Invitation",
+  "Other",
 ];
 
 export interface EventEntryReceiver {
-    address?: Array<Address>;
-    contact?: Array<Contact>;
+  address?: Array<Address>;
+  contact?: Array<Contact>;
 }
 
 export interface EventList {
-    iofVersion?: string;
-    createTime?: number;
-    creator?: string;
-    event?: Array<Event>;
-    extensions?: Extensions;
+  iofVersion?: string;
+  createTime?: number;
+  creator?: string;
+  event?: Array<Event>;
+  extensions?: Extensions;
 }
 
 export interface EventRace {
-    raceNumber?: number;
-    name?: string;
-    startTime?: Date;
-    endTime?: Date;
-    status?: EventRaceStatusEnum;
-    classification?: EventRaceClassificationEnum;
-    position?: Position;
-    discipline?: Array<EventRaceDisciplineEnum>;
-    organiser?: Array<Organisation>;
-    official?: Array<Role>;
-    service?: Array<Service>;
-    url?: Array<Url>;
-    extensions?: Extensions;
-    modifyTime?: number;
+  raceNumber?: number;
+  name?: string;
+  startTime?: DateTime;
+  endTime?: DateTime;
+  status?: EventRaceStatusEnum;
+  classification?: EventRaceClassificationEnum;
+  position?: Position;
+  discipline?: Array<EventRaceDisciplineEnum>;
+  organiser?: Array<Organisation>;
+  official?: Array<Role>;
+  service?: Array<Service>;
+  url?: Array<Url>;
+  extensions?: Extensions;
+  modifyTime?: number;
 }
 
 export type EventRaceStatusEnum =
-    | "PLANNED"
-    | "APPLIED"
-    | "PROPOSED"
-    | "SANCTIONED"
-    | "CANCELED"
-    | "RESCHEDULED";
+  | "PLANNED"
+  | "APPLIED"
+  | "PROPOSED"
+  | "SANCTIONED"
+  | "CANCELED"
+  | "RESCHEDULED";
 
 export const EventRaceStatusEnumValues: EventRaceStatusEnum[] = [
-    "PLANNED",
-    "APPLIED",
-    "PROPOSED",
-    "SANCTIONED",
-    "CANCELED",
-    "RESCHEDULED",
+  "PLANNED",
+  "APPLIED",
+  "PROPOSED",
+  "SANCTIONED",
+  "CANCELED",
+  "RESCHEDULED",
 ];
 
 export type EventRaceClassificationEnum =
-    | "INTERNATIONAL"
-    | "NATIONAL"
-    | "REGIONAL"
-    | "LOCAL"
-    | "CLUB";
+  | "INTERNATIONAL"
+  | "NATIONAL"
+  | "REGIONAL"
+  | "LOCAL"
+  | "CLUB";
 
-export const EventRaceClassificationEnumValues: EventRaceClassificationEnum[] = [
-    "INTERNATIONAL",
-    "NATIONAL",
-    "REGIONAL",
-    "LOCAL",
-    "CLUB",
-];
+export const EventRaceClassificationEnumValues: EventRaceClassificationEnum[] =
+  ["INTERNATIONAL", "NATIONAL", "REGIONAL", "LOCAL", "CLUB"];
 
 export type EventRaceDisciplineEnum =
-    | "SPRINT"
-    | "MIDDLE"
-    | "LONG"
-    | "ULTRALONG"
-    | "OTHER";
+  | "SPRINT"
+  | "MIDDLE"
+  | "LONG"
+  | "ULTRALONG"
+  | "OTHER";
 
 export const EventRaceDisciplineEnumValues: EventRaceDisciplineEnum[] = [
-    "SPRINT",
-    "MIDDLE",
-    "LONG",
-    "ULTRALONG",
-    "OTHER",
+  "SPRINT",
+  "MIDDLE",
+  "LONG",
+  "ULTRALONG",
+  "OTHER",
 ];
 
 export interface EventSchedule {
-    startTime?: number;
-    endTime?: number;
-    name?: string;
-    venue?: string;
-    position?: Position;
-    details?: string;
-    modifyTime?: number;
+  startTime?: number;
+  endTime?: number;
+  name?: string;
+  venue?: string;
+  position?: Position;
+  details?: string;
+  modifyTime?: number;
 }
 
 export interface Extensions {
-    any?: Array<any>;
+  any?: Array<any>;
 }
 
 export interface ExternalLogin {
-    externalLoginUrl?: string;
+  externalLoginUrl?: string;
 }
 
 export interface Fee {
-    id?: Id;
-    name?: Array<LanguageString>;
-    amount?: Amount;
-    taxableAmount?: Amount;
-    percentage?: number;
-    taxablePercentage?: number;
-    validFromTime?: number;
-    validToTime?: number;
-    fromDateOfBirth?: number;
-    toDateOfBirth?: number;
-    extensions?: Extensions;
-    type?: string;
-    modifyTime?: number;
+  id?: Id;
+  name?: Array<LanguageString>;
+  amount?: Amount;
+  taxableAmount?: Amount;
+  percentage?: number;
+  taxablePercentage?: number;
+  validFromTime?: number;
+  validToTime?: number;
+  fromDateOfBirth?: number;
+  toDateOfBirth?: number;
+  extensions?: Extensions;
+  type?: string;
+  modifyTime?: number;
 }
 
 export interface Id {
-    value?: string;
-    type?: string;
+  value?: string;
+  type?: string;
 }
 
 export interface ImportResultListResult {
-    resultListUrl?: string;
-    splitTimeListUrl?: string;
+  resultListUrl?: string;
+  splitTimeListUrl?: string;
 }
 
 export interface Information {
-    title?: string;
-    content?: string;
-    modifyTime?: number;
+  title?: string;
+  content?: string;
+  modifyTime?: number;
 }
 
 export interface LanguageString {
-    value?: string;
-    language?: string;
+  value?: string;
+  language?: string;
 }
 
 export interface Logotype {
-    value?: Array<number>;
-    url?: string;
-    mediaType?: string;
-    width?: number;
-    height?: number;
-    resolution?: number;
+  value?: Array<number>;
+  url?: string;
+  mediaType?: string;
+  width?: number;
+  height?: number;
+  resolution?: number;
 }
 
 export interface MapPosition {
-    x?: number;
-    y?: number;
-    unit?: string;
+  x?: number;
+  y?: number;
+  unit?: string;
 }
 
 export interface Nationality {
-    value?: string;
-    code?: string;
+  value?: string;
+  code?: string;
 }
 
 export interface OnlineControl {
-    id?: Id;
-    punchingUnitId?: Array<Id>;
-    name?: Array<LanguageString>;
-    position?: Position;
-    mapPosition?: MapPosition;
-    extensions?: Extensions;
-    type?: OnlineControlTypeEnum;
-    modifyTime?: number;
+  id?: Id;
+  punchingUnitId?: Array<Id>;
+  name?: Array<LanguageString>;
+  position?: Position;
+  mapPosition?: MapPosition;
+  extensions?: Extensions;
+  type?: OnlineControlTypeEnum;
+  modifyTime?: number;
 }
 
 export type OnlineControlTypeEnum =
-    | "CONTROL"
-    | "START"
-    | "FINISH"
-    | "CROSSING_POINT"
-    | "END_OF_MARKED_ROUTE";
+  | "CONTROL"
+  | "START"
+  | "FINISH"
+  | "CROSSING_POINT"
+  | "END_OF_MARKED_ROUTE";
 
 export const OnlineControlTypeEnumValues: OnlineControlTypeEnum[] = [
-    "CONTROL",
-    "START",
-    "FINISH",
-    "CROSSING_POINT",
-    "END_OF_MARKED_ROUTE",
+  "CONTROL",
+  "START",
+  "FINISH",
+  "CROSSING_POINT",
+  "END_OF_MARKED_ROUTE",
 ];
 
 export interface Organisation {
-    id?: Id;
-    name?: string;
-    shortName?: string;
-    mediaName?: string;
-    parentOrganisationId?: number;
-    country?: Nationality;
-    address?: Array<Address>;
-    contact?: Array<Contact>;
-    position?: Position;
-    account?: Array<Account>;
-    role?: Array<Role>;
-    logotype?: Array<Logotype>;
-    extensions?: Extensions;
-    type?: string;
-    modifyTime?: number;
+  id?: Id;
+  name?: string;
+  shortName?: string;
+  mediaName?: string;
+  parentOrganisationId?: number;
+  country?: Nationality;
+  address?: Array<Address>;
+  contact?: Array<Contact>;
+  position?: Position;
+  account?: Array<Account>;
+  role?: Array<Role>;
+  logotype?: Array<Logotype>;
+  extensions?: Extensions;
+  type?: string;
+  modifyTime?: number;
 }
 
 export interface OrganisationCompetitorCount {
-    organisationId?: string;
-    numberOfEntries?: number;
-    numberOfStarts?: number;
+  organisationId?: string;
+  numberOfEntries?: number;
+  numberOfStarts?: number;
 }
 
 export interface OrganisationList {
-    iofVersion?: string;
-    createTime?: number;
-    creator?: string;
-    organisation?: Array<Organisation>;
-    extensions?: Extensions;
+  iofVersion?: string;
+  createTime?: number;
+  creator?: string;
+  organisation?: Array<Organisation>;
+  extensions?: Extensions;
 }
 
 export interface OverallResult {
-    time?: number;
-    timeBehind?: number;
-    position?: number;
-    status?: OverallResultStatusEnum;
-    score?: Array<Score>;
-    extensions?: Extensions;
+  time?: number;
+  timeBehind?: number;
+  position?: number;
+  status?: OverallResultStatusEnum;
+  score?: Array<Score>;
+  extensions?: Extensions;
 }
 
 export type OverallResultStatusEnum =
-    | "OK"
-    | "FINISHED"
-    | "MISSING_PUNCH"
-    | "DISQUALIFIED"
-    | "DID_NOT_FINISH"
-    | "ACTIVE"
-    | "INACTIVE"
-    | "OVER_TIME"
-    | "SPORTING_WITHDRAWAL"
-    | "NOT_COMPETING"
-    | "MOVED"
-    | "MOVED_UP"
-    | "DID_NOT_START"
-    | "DID_NOT_ENTER"
-    | "CANCELLED";
+  | "OK"
+  | "FINISHED"
+  | "MISSING_PUNCH"
+  | "DISQUALIFIED"
+  | "DID_NOT_FINISH"
+  | "ACTIVE"
+  | "INACTIVE"
+  | "OVER_TIME"
+  | "SPORTING_WITHDRAWAL"
+  | "NOT_COMPETING"
+  | "MOVED"
+  | "MOVED_UP"
+  | "DID_NOT_START"
+  | "DID_NOT_ENTER"
+  | "CANCELLED";
 
 export const OverallResultStatusEnumValues: OverallResultStatusEnum[] = [
-    "OK",
-    "FINISHED",
-    "MISSING_PUNCH",
-    "DISQUALIFIED",
-    "DID_NOT_FINISH",
-    "ACTIVE",
-    "INACTIVE",
-    "OVER_TIME",
-    "SPORTING_WITHDRAWAL",
-    "NOT_COMPETING",
-    "MOVED",
-    "MOVED_UP",
-    "DID_NOT_START",
-    "DID_NOT_ENTER",
-    "CANCELLED",
+  "OK",
+  "FINISHED",
+  "MISSING_PUNCH",
+  "DISQUALIFIED",
+  "DID_NOT_FINISH",
+  "ACTIVE",
+  "INACTIVE",
+  "OVER_TIME",
+  "SPORTING_WITHDRAWAL",
+  "NOT_COMPETING",
+  "MOVED",
+  "MOVED_UP",
+  "DID_NOT_START",
+  "DID_NOT_ENTER",
+  "CANCELLED",
 ];
 
 export interface Person {
-    id?: Array<Id>;
-    name?: PersonName;
-    birthDate?: number;
-    nationality?: Nationality;
-    address?: Array<Address>;
-    contact?: Array<Contact>;
-    sex?: string;
-    modifyTime?: number;
+  id?: Array<Id>;
+  name?: PersonName;
+  birthDate?: number;
+  nationality?: Nationality;
+  address?: Array<Address>;
+  contact?: Array<Contact>;
+  sex?: string;
+  modifyTime?: number;
 }
 
 export interface PersonName {
-    family?: string;
-    given?: string;
+  family?: string;
+  given?: string;
 }
 
 export interface PersonServiceRequest {
-    person?: Person;
-    serviceRequest?: Array<ServiceRequest>;
+  person?: Person;
+  serviceRequest?: Array<ServiceRequest>;
 }
 
 export interface Position {
-    lng?: number;
-    lat?: number;
-    alt?: number;
+  lng?: number;
+  lat?: number;
+  alt?: number;
 }
 
 export interface ResultList {
-    iofVersion?: string;
-    createTime?: number;
-    creator?: string;
-    event?: Event;
-    classResult?: Array<ResultListClassResult>;
-    extensions?: Extensions;
-    status?: string;
+  iofVersion?: string;
+  createTime?: number;
+  creator?: string;
+  event?: Event;
+  classResult?: Array<ResultListClassResult>;
+  extensions?: Extensions;
+  status?: string;
 }
 
 export interface ResultListClassResult {
-    clazz?: Clazz;
-    course?: Array<SimpleRaceCourse>;
-    personResult?: Array<ResultListPersonResult>;
-    teamResult?: Array<ResultListTeamResult>;
-    extensions?: Extensions;
-    timeResolution?: number;
-    modifyTime?: number;
+  clazz?: Clazz;
+  course?: Array<SimpleRaceCourse>;
+  personResult?: Array<ResultListPersonResult>;
+  teamResult?: Array<ResultListTeamResult>;
+  extensions?: Extensions;
+  timeResolution?: number;
+  modifyTime?: number;
 }
 
 export interface ResultListPersonResult {
-    entryId?: Id;
-    person?: Person;
-    organisation?: Organisation;
-    result?: Array<ResultListResult>;
-    extensions?: Extensions;
-    modifyTime?: number;
+  entryId?: Id;
+  person?: Person;
+  organisation?: Organisation;
+  result?: Array<ResultListResult>;
+  extensions?: Extensions;
+  modifyTime?: number;
 }
 
 export interface ResultListPosition {
-    value?: number;
-    type?: string;
+  value?: number;
+  type?: string;
 }
 
 export interface ResultListResult {
-    bibNumber?: string;
-    startTime?: number;
-    finishTime?: number;
-    time?: number;
-    timeBehind?: number;
-    position?: number;
-    status?: ResultListResultStatusEnum;
-    score?: Array<Score>;
-    overallResult?: OverallResult;
-    course?: SimpleCourse;
-    splitTime?: Array<SplitTime>;
-    controlAnswer?: Array<ControlAnswer>;
-    route?: Route;
-    controlCard?: Array<ControlCard>;
-    assignedFee?: Array<AssignedFee>;
-    serviceRequest?: Array<ServiceRequest>;
-    extensions?: Extensions;
-    raceNumber?: number;
+  bibNumber?: string;
+  startTime?: number;
+  finishTime?: number;
+  time?: number;
+  timeBehind?: number;
+  position?: number;
+  status?: ResultListResultStatusEnum;
+  score?: Array<Score>;
+  overallResult?: OverallResult;
+  course?: SimpleCourse;
+  splitTime?: Array<SplitTime>;
+  controlAnswer?: Array<ControlAnswer>;
+  route?: Route;
+  controlCard?: Array<ControlCard>;
+  assignedFee?: Array<AssignedFee>;
+  serviceRequest?: Array<ServiceRequest>;
+  extensions?: Extensions;
+  raceNumber?: number;
 }
 
 export type ResultListResultStatusEnum =
-    | "OK"
-    | "FINISHED"
-    | "MISSING_PUNCH"
-    | "DISQUALIFIED"
-    | "DID_NOT_FINISH"
-    | "ACTIVE"
-    | "INACTIVE"
-    | "OVER_TIME"
-    | "SPORTING_WITHDRAWAL"
-    | "NOT_COMPETING"
-    | "MOVED"
-    | "MOVED_UP"
-    | "DID_NOT_START"
-    | "DID_NOT_ENTER"
-    | "CANCELLED";
+  | "OK"
+  | "FINISHED"
+  | "MISSING_PUNCH"
+  | "DISQUALIFIED"
+  | "DID_NOT_FINISH"
+  | "ACTIVE"
+  | "INACTIVE"
+  | "OVER_TIME"
+  | "SPORTING_WITHDRAWAL"
+  | "NOT_COMPETING"
+  | "MOVED"
+  | "MOVED_UP"
+  | "DID_NOT_START"
+  | "DID_NOT_ENTER"
+  | "CANCELLED";
 
 export const ResultListResultStatusEnumValues: ResultListResultStatusEnum[] = [
-    "OK",
-    "FINISHED",
-    "MISSING_PUNCH",
-    "DISQUALIFIED",
-    "DID_NOT_FINISH",
-    "ACTIVE",
-    "INACTIVE",
-    "OVER_TIME",
-    "SPORTING_WITHDRAWAL",
-    "NOT_COMPETING",
-    "MOVED",
-    "MOVED_UP",
-    "DID_NOT_START",
-    "DID_NOT_ENTER",
-    "CANCELLED",
+  "OK",
+  "FINISHED",
+  "MISSING_PUNCH",
+  "DISQUALIFIED",
+  "DID_NOT_FINISH",
+  "ACTIVE",
+  "INACTIVE",
+  "OVER_TIME",
+  "SPORTING_WITHDRAWAL",
+  "NOT_COMPETING",
+  "MOVED",
+  "MOVED_UP",
+  "DID_NOT_START",
+  "DID_NOT_ENTER",
+  "CANCELLED",
 ];
 
 export interface ResultListResult1 {
-    leg?: number;
-    legOrder?: number;
-    bibNumber?: string;
-    startTime?: number;
-    finishTime?: number;
-    time?: number;
-    timeBehind?: Array<ResultListTimeBehind>;
-    position?: Array<ResultListPosition>;
-    status?: ResultListResult1StatusEnum;
-    score?: Array<Score>;
-    overallResult?: OverallResult;
-    course?: SimpleCourse;
-    splitTime?: Array<SplitTime>;
-    controlAnswer?: Array<ControlAnswer>;
-    route?: Route;
-    controlCard?: Array<ControlCard>;
-    assignedFee?: Array<AssignedFee>;
-    serviceRequest?: Array<ServiceRequest>;
-    extensions?: Extensions;
-    raceNumber?: number;
+  leg?: number;
+  legOrder?: number;
+  bibNumber?: string;
+  startTime?: number;
+  finishTime?: number;
+  time?: number;
+  timeBehind?: Array<ResultListTimeBehind>;
+  position?: Array<ResultListPosition>;
+  status?: ResultListResult1StatusEnum;
+  score?: Array<Score>;
+  overallResult?: OverallResult;
+  course?: SimpleCourse;
+  splitTime?: Array<SplitTime>;
+  controlAnswer?: Array<ControlAnswer>;
+  route?: Route;
+  controlCard?: Array<ControlCard>;
+  assignedFee?: Array<AssignedFee>;
+  serviceRequest?: Array<ServiceRequest>;
+  extensions?: Extensions;
+  raceNumber?: number;
 }
 
 export type ResultListResult1StatusEnum =
-    | "OK"
-    | "FINISHED"
-    | "MISSING_PUNCH"
-    | "DISQUALIFIED"
-    | "DID_NOT_FINISH"
-    | "ACTIVE"
-    | "INACTIVE"
-    | "OVER_TIME"
-    | "SPORTING_WITHDRAWAL"
-    | "NOT_COMPETING"
-    | "MOVED"
-    | "MOVED_UP"
-    | "DID_NOT_START"
-    | "DID_NOT_ENTER"
-    | "CANCELLED";
+  | "OK"
+  | "FINISHED"
+  | "MISSING_PUNCH"
+  | "DISQUALIFIED"
+  | "DID_NOT_FINISH"
+  | "ACTIVE"
+  | "INACTIVE"
+  | "OVER_TIME"
+  | "SPORTING_WITHDRAWAL"
+  | "NOT_COMPETING"
+  | "MOVED"
+  | "MOVED_UP"
+  | "DID_NOT_START"
+  | "DID_NOT_ENTER"
+  | "CANCELLED";
 
-export const ResultListResult1StatusEnumValues: ResultListResult1StatusEnum[] = [
+export const ResultListResult1StatusEnumValues: ResultListResult1StatusEnum[] =
+  [
     "OK",
     "FINISHED",
     "MISSING_PUNCH",
@@ -869,198 +855,198 @@ export const ResultListResult1StatusEnumValues: ResultListResult1StatusEnum[] = 
     "DID_NOT_START",
     "DID_NOT_ENTER",
     "CANCELLED",
-];
+  ];
 
 export interface ResultListTeamMemberResult {
-    entryId?: Id;
-    person?: Person;
-    organisation?: Organisation;
-    result?: Array<ResultListResult1>;
-    extensions?: Extensions;
-    modifyTime?: number;
+  entryId?: Id;
+  person?: Person;
+  organisation?: Organisation;
+  result?: Array<ResultListResult1>;
+  extensions?: Extensions;
+  modifyTime?: number;
 }
 
 export interface ResultListTeamResult {
-    entryId?: Id;
-    name?: string;
-    organisation?: Array<Organisation>;
-    bibNumber?: string;
-    teamMemberResult?: Array<ResultListTeamMemberResult>;
-    assignedFee?: Array<AssignedFee>;
-    serviceRequest?: Array<ServiceRequest>;
-    extensions?: Extensions;
+  entryId?: Id;
+  name?: string;
+  organisation?: Array<Organisation>;
+  bibNumber?: string;
+  teamMemberResult?: Array<ResultListTeamMemberResult>;
+  assignedFee?: Array<AssignedFee>;
+  serviceRequest?: Array<ServiceRequest>;
+  extensions?: Extensions;
 }
 
 export interface ResultListTimeBehind {
-    value?: number;
-    type?: string;
+  value?: number;
+  type?: string;
 }
 
 export interface Role {
-    person?: Person;
-    type?: string;
+  person?: Person;
+  type?: string;
 }
 
 export interface Route {
-    value?: Array<number>;
+  value?: Array<number>;
 }
 
 export interface Score {
-    value?: number;
-    type?: string;
+  value?: number;
+  type?: string;
 }
 
 export interface Service {
-    id?: Id;
-    name?: Array<LanguageString>;
-    fee?: Array<Fee>;
-    description?: Array<LanguageString>;
-    maxNumber?: number;
-    requestedNumber?: number;
-    extensions?: Extensions;
-    type?: string;
-    modifyTime?: number;
+  id?: Id;
+  name?: Array<LanguageString>;
+  fee?: Array<Fee>;
+  description?: Array<LanguageString>;
+  maxNumber?: number;
+  requestedNumber?: number;
+  extensions?: Extensions;
+  type?: string;
+  modifyTime?: number;
 }
 
 export interface ServiceRequest {
-    id?: Id;
-    service?: Service;
-    requestedQuantity?: number;
-    deliveredQuantity?: number;
-    comment?: string;
-    assignedFee?: Array<AssignedFee>;
-    extensions?: Extensions;
-    modifyTime?: number;
+  id?: Id;
+  service?: Service;
+  requestedQuantity?: number;
+  deliveredQuantity?: number;
+  comment?: string;
+  assignedFee?: Array<AssignedFee>;
+  extensions?: Extensions;
+  modifyTime?: number;
 }
 
 export interface ServiceRequestList {
-    iofVersion?: string;
-    createTime?: number;
-    creator?: string;
-    event?: Event;
-    organisationServiceRequest?: Array<ServiceRequestListOrganisationServiceRequest>;
-    personServiceRequest?: Array<PersonServiceRequest>;
-    extensions?: Extensions;
+  iofVersion?: string;
+  createTime?: number;
+  creator?: string;
+  event?: Event;
+  organisationServiceRequest?: Array<ServiceRequestListOrganisationServiceRequest>;
+  personServiceRequest?: Array<PersonServiceRequest>;
+  extensions?: Extensions;
 }
 
 export interface ServiceRequestListOrganisationServiceRequest {
-    organisation?: Organisation;
-    serviceRequest?: Array<ServiceRequest>;
-    personServiceRequest?: Array<PersonServiceRequest>;
+  organisation?: Organisation;
+  serviceRequest?: Array<ServiceRequest>;
+  personServiceRequest?: Array<PersonServiceRequest>;
 }
 
 export interface SimpleCourse {
-    id?: Id;
-    name?: string;
-    courseFamily?: string;
-    length?: number;
-    climb?: number;
-    numberOfControls?: number;
+  id?: Id;
+  name?: string;
+  courseFamily?: string;
+  length?: number;
+  climb?: number;
+  numberOfControls?: number;
 }
 
 export interface SimpleRaceCourse {
-    id?: Id;
-    name?: string;
-    courseFamily?: string;
-    length?: number;
-    climb?: number;
-    numberOfControls?: number;
-    raceNumber?: number;
+  id?: Id;
+  name?: string;
+  courseFamily?: string;
+  length?: number;
+  climb?: number;
+  numberOfControls?: number;
+  raceNumber?: number;
 }
 
 export interface SplitTime {
-    controlCode?: string;
-    time?: number;
-    extensions?: Extensions;
-    status?: string;
+  controlCode?: string;
+  time?: number;
+  extensions?: Extensions;
+  status?: string;
 }
 
 export interface StartList {
-    iofVersion?: string;
-    createTime?: number;
-    creator?: string;
-    event?: Event;
-    classStart?: Array<StartListClassStart>;
-    extensions?: Extensions;
+  iofVersion?: string;
+  createTime?: number;
+  creator?: string;
+  event?: Event;
+  classStart?: Array<StartListClassStart>;
+  extensions?: Extensions;
 }
 
 export interface StartListClassStart {
-    clazz?: Clazz;
-    course?: Array<SimpleRaceCourse>;
-    startName?: Array<StartListStartName>;
-    personStart?: Array<StartListPersonStart>;
-    teamStart?: Array<StartListTeamStart>;
-    extensions?: Extensions;
-    timeResolution?: number;
-    modifyTime?: number;
+  clazz?: Clazz;
+  course?: Array<SimpleRaceCourse>;
+  startName?: Array<StartListStartName>;
+  personStart?: Array<StartListPersonStart>;
+  teamStart?: Array<StartListTeamStart>;
+  extensions?: Extensions;
+  timeResolution?: number;
+  modifyTime?: number;
 }
 
 export interface StartListPersonStart {
-    entryId?: Id;
-    person?: Person;
-    organisation?: Organisation;
-    start?: Array<StartListStart>;
-    extensions?: Extensions;
-    modifyTime?: number;
+  entryId?: Id;
+  person?: Person;
+  organisation?: Organisation;
+  start?: Array<StartListStart>;
+  extensions?: Extensions;
+  modifyTime?: number;
 }
 
 export interface StartListStart {
-    bibNumber?: string;
-    startTime?: number;
-    course?: SimpleCourse;
-    controlCard?: Array<ControlCard>;
-    assignedFee?: Array<AssignedFee>;
-    serviceRequest?: Array<ServiceRequest>;
-    extensions?: Extensions;
-    raceNumber?: number;
+  bibNumber?: string;
+  startTime?: number;
+  course?: SimpleCourse;
+  controlCard?: Array<ControlCard>;
+  assignedFee?: Array<AssignedFee>;
+  serviceRequest?: Array<ServiceRequest>;
+  extensions?: Extensions;
+  raceNumber?: number;
 }
 
 export interface StartListStart1 {
-    leg?: number;
-    legOrder?: number;
-    bibNumber?: string;
-    startTime?: number;
-    course?: SimpleCourse;
-    controlCard?: Array<ControlCard>;
-    assignedFee?: Array<AssignedFee>;
-    serviceRequest?: Array<ServiceRequest>;
-    extensions?: Extensions;
-    raceNumber?: number;
+  leg?: number;
+  legOrder?: number;
+  bibNumber?: string;
+  startTime?: number;
+  course?: SimpleCourse;
+  controlCard?: Array<ControlCard>;
+  assignedFee?: Array<AssignedFee>;
+  serviceRequest?: Array<ServiceRequest>;
+  extensions?: Extensions;
+  raceNumber?: number;
 }
 
 export interface StartListStartName {
-    value?: string;
-    raceNumber?: number;
+  value?: string;
+  raceNumber?: number;
 }
 
 export interface StartListTeamMemberStart {
-    entryId?: Id;
-    person?: Person;
-    organisation?: Organisation;
-    start?: Array<StartListStart1>;
-    extensions?: Extensions;
-    modifyTime?: number;
+  entryId?: Id;
+  person?: Person;
+  organisation?: Organisation;
+  start?: Array<StartListStart1>;
+  extensions?: Extensions;
+  modifyTime?: number;
 }
 
 export interface StartListTeamStart {
-    entryId?: Id;
-    name?: string;
-    organisation?: Array<Organisation>;
-    bibNumber?: string;
-    teamMemberStart?: Array<StartListTeamMemberStart>;
-    assignedFee?: Array<AssignedFee>;
-    serviceRequest?: Array<ServiceRequest>;
-    extensions?: Extensions;
-    modifyTime?: number;
+  entryId?: Id;
+  name?: string;
+  organisation?: Array<Organisation>;
+  bibNumber?: string;
+  teamMemberStart?: Array<StartListTeamMemberStart>;
+  assignedFee?: Array<AssignedFee>;
+  serviceRequest?: Array<ServiceRequest>;
+  extensions?: Extensions;
+  modifyTime?: number;
 }
 
 export interface StartTimeAllocationRequest {
-    organisation?: Organisation;
-    person?: Person;
-    type?: string;
+  organisation?: Organisation;
+  person?: Person;
+  type?: string;
 }
 
 export interface Url {
-    value?: string;
-    type?: string;
+  value?: string;
+  type?: string;
 }
