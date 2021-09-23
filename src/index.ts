@@ -2,6 +2,8 @@ import { ResultList } from "./model";
 
 import { JSDOM } from "jsdom";
 
+import result_ from "./resources/res2021-09-18.json";
+
 type ResultListOptions = {
   /** Title for this race */
   title?: string;
@@ -33,7 +35,27 @@ type ResultListOptions = {
   rentalDevices?: number;
 };
 
-const createResultListHeader = (doc: Document, options: ResultListOptions) => {
+type ClubRegex = { clubName: string; clubRegex?: RegExp };
+type ClubParticipation = { clubName: string; count: number };
+export const getClubDistribution = (
+  clubs: ClubRegex[],
+  resultList: ResultList,
+): ClubParticipation[] => {
+  resultList.classResult?.forEach((classType) =>
+    classType.personResult?.forEach((personResult) =>
+      // TODO start checking against regex
+      console.log(personResult.organisation?.name),
+    ),
+  );
+
+  return [];
+};
+
+const createResultListHeader = (
+  doc: Document,
+  options: ResultListOptions,
+  resultList: ResultList,
+) => {
   let pre = doc.createElement("pre");
 
   const dateOptions = {
@@ -41,6 +63,9 @@ const createResultListHeader = (doc: Document, options: ResultListOptions) => {
     month: "long",
     day: "numeric",
   };
+
+  getClubDistribution([], resultList);
+
   pre.textContent = `
     Data/sted:    ${
       //@ts-ignore
@@ -92,16 +117,16 @@ export const createResultList = (
   const doc = dom.window.document;
 
   // Add titles
-  doc.title = options.title ?? "Rankingløp";
+  doc.title = options.title ?? resultList.event?.name ?? "Rankingløp backup";
   let header = doc.createElement("h1");
   header.textContent = doc.title;
   doc.body.append(header);
 
-  doc.body.append(createResultListHeader(doc, options));
+  doc.body.append(createResultListHeader(doc, options, resultList));
 
   console.log(dom.serialize());
 
   return "";
 };
 
-createResultList({}, {});
+createResultList(result_.resultList as ResultList, {});
