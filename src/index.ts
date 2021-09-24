@@ -16,9 +16,10 @@ type YearDistribution = {
 };
 
 type ResultListOptions = {
-  /** Title for this race */
+  /** Title of this race */
   title?: string;
 
+  /** Date of the event in ISO 8601 date format (YYYY-MM-DD) */
   isoDate?: string;
 
   /** Location of the event */
@@ -33,6 +34,7 @@ type ResultListOptions = {
   /** Which persons were organising the event, e.g. "Bern Nordmand" */
   organiserPersons?: string[];
 
+  /** How old were the participants */
   yearDistribution?: YearDistribution;
 
   startContingent?: { amount: number; quota: "number" }[];
@@ -41,7 +43,9 @@ type ResultListOptions = {
 };
 
 type ClubRegex = { clubName: string; clubRegex: RegExp };
+
 type ClubParticipation = { clubName: string; count: number };
+
 export const getClubDistribution = (
   clubs: ClubRegex[],
   resultList: ResultList,
@@ -94,11 +98,14 @@ const createResultListHeader = (
 ) => {
   let pre = doc.createElement("pre");
 
+  const raceDate = options.isoDate ? new Date(options.isoDate) : new Date();
   const dateOptions = {
     year: "numeric",
     month: "long",
     day: "numeric",
   };
+  //@ts-ignore
+  const localeRaceDate = raceDate.toLocaleDateString("nb-NO", dateOptions);
 
   const clubDistribution = getClubDistribution(
     [
@@ -128,43 +135,19 @@ const createResultListHeader = (
   const numDiscounts = getNumDiscountPrice(yearDistribution, clubDistribution);
   const numPostInvoices = getNumPostInvoicing(clubDistribution);
 
-  const raceDate = options.isoDate ? new Date(options.isoDate) : new Date();
+  // prettier-ignore
   pre.textContent = `
-    Data/sted:    ${
-      //@ts-ignore
-      raceDate.toLocaleDateString("nb-NO", dateOptions)
-    } ${options.place ? "- " + options.place : ""}
+    Data/sted:    ${ localeRaceDate } ${options.place ? "- " + options.place : ""}
     Kart:         ${options.map ?? ""}
-    Arr:          ${options.organiserClub ?? "GeoForm"} v/${
-    options.organiserPersons?.join(", ") ?? ""
-  }
+    Arr:          ${options.organiserClub ?? "GeoForm"} v/${ options.organiserPersons?.join(", ") ?? "" }
     Antall:       Totalt: ${totalParticipation} ${distributionStr}
-    Løpsrapport:  Alder:  21-: ${yearDistribution.adult ?? 0},  17-20: ${
-    yearDistribution.oldTeenager ?? 0
-  },  13-16: ${yearDistribution.youngTeenager ?? 0},  0-12: ${
-    yearDistribution.child ?? 0
-  }
-    Startkont:    kr. 50: ${
-      totalParticipation - numDiscounts
-    }   kr. 30: ${numDiscounts}   kr. 0: 0
-    Betalt:       kr. 50: ${totalParticipation - numDiscounts}   kr. 30: ${
-    numDiscounts - numPostInvoices
-  }   kr. 0: ${numPostInvoices}
+    Løpsrapport:  Alder:  21-: ${yearDistribution.adult ?? 0},  17-20: ${ yearDistribution.oldTeenager ?? 0 },  13-16: ${yearDistribution.youngTeenager ?? 0},  0-12: ${ yearDistribution.child ?? 0 }
+    Startkont:    kr. 50: ${ totalParticipation - numDiscounts }   kr. 30: ${numDiscounts}   kr. 0: 0
+    Betalt:       kr. 50: ${totalParticipation - numDiscounts}   kr. 30: ${ numDiscounts - numPostInvoices }   kr. 0: ${numPostInvoices}
     Leiebrikker:  ${options.rentalDevices ?? 0} stk
     `
     .trim()
     .replace(/^ {4}/gm, "");
-
-  /*
-Dato/sted:   18. september 2021 - Svartkulp
-Kart:        Sognsvann
-Arr:         Sentrum OK v/Magne Vollen å Lenny Enstrøm
-Antall:      Totalt: 106  (GeoForm: 8, OSI: 2, DNV/ESSO: 3, Andre: 93)
-Løpsrapport: Alder:  21-: 106,  17-20: 0,  13-16: 0,  0-12: 0
-Startkont:   kr. 50: 93   kr. 30: 13   kr. 0: 0
-Betalt:      kr. 50: 93   kr. 30: 10   kr. 0: 3
-Leiebrikker: 0 stk
-*/
 
   // TODO add result list links
   // TODO add split times links
@@ -205,6 +188,7 @@ export const createResultList = (
 };
 
 createResultList(result_.resultList as ResultList, {
+  isoDate: "2021-09-18",
   place: "Svartkulp",
   map: "Sognsvann",
   organiserClub: "OSI",
