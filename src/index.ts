@@ -77,7 +77,7 @@ const getNumDiscountPrice = (
   clubDistribution: ClubParticipation[],
 ) => {
   const discountClubs = clubDistribution.filter((club) =>
-    /(DNV|GeoForm|OSI)/i.test(club.clubName),
+    /(DNV|GeoForm|OSI|Oslostudentenes)/i.test(club.clubName),
   );
 
   return (
