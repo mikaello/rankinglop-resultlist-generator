@@ -1,5 +1,7 @@
+import { JSDOM } from "jsdom";
 import { ResultListOptions, YearDistribution } from ".";
 import { ResultList } from "./model";
+import { getClassName } from "./modelHelpers.js";
 
 type ClubRegex = { clubName: string; clubRegex: RegExp };
 
@@ -7,10 +9,10 @@ type ClubParticipation = { clubName: string; count: number };
 
 export const getClubDistribution = (
   clubs: ClubRegex[],
-  resultList: ResultList
+  resultList: ResultList,
 ): ClubParticipation[] => {
   const clubP = new Map(
-    clubs.map((club) => [club.clubName, { clubName: club.clubName, count: 0 }])
+    clubs.map((club) => [club.clubName, { clubName: club.clubName, count: 0 }]),
   );
 
   resultList.classResult?.forEach((classType) =>
@@ -25,7 +27,7 @@ export const getClubDistribution = (
           break;
         }
       }
-    })
+    }),
   );
 
   return Array.from(clubP.values());
@@ -33,10 +35,10 @@ export const getClubDistribution = (
 
 const getNumDiscountPrice = (
   yearDistribution: YearDistribution,
-  clubDistribution: ClubParticipation[]
+  clubDistribution: ClubParticipation[],
 ) => {
   const discountClubs = clubDistribution.filter((club) =>
-    /(DNV|GeoForm|OSI|Oslostudentenes)/i.test(club.clubName)
+    /(DNV|GeoForm|OSI|Oslostudentenes)/i.test(club.clubName),
   );
 
   return (
@@ -51,10 +53,10 @@ const getNumPostInvoicing = (getClubDistribution: ClubParticipation[]) => {
 };
 
 export const createResultListHeader = (
-  doc: Document,
+  { window: { document: doc, DOMParser } }: JSDOM,
   options: ResultListOptions,
-  resultList: ResultList
-) => {
+  resultList: ResultList,
+): HTMLElement => {
   let pre = doc.createElement("pre");
 
   const raceDate = options.isoDate ? new Date(options.isoDate) : new Date();
@@ -73,7 +75,7 @@ export const createResultListHeader = (
       { clubName: "DNV", clubRegex: new RegExp(/(DNV|ESSO|Veritas|VBIL)/i) },
       { clubName: "Andre", clubRegex: new RegExp(/.*/i) },
     ],
-    resultList
+    resultList,
   );
   const distributionStr =
     clubDistribution.length > 0
@@ -84,7 +86,7 @@ export const createResultListHeader = (
 
   const totalParticipation = clubDistribution.reduce(
     (acc, curr) => acc + curr.count,
-    0
+    0,
   );
 
   const yearDistribution = options.yearDistribution
@@ -104,9 +106,39 @@ export const createResultListHeader = (
     Startkont:    kr. 50: ${ totalParticipation - numDiscounts }   kr. 30: ${numDiscounts}   kr. 0: 0
     Betalt:       kr. 50: ${totalParticipation - numDiscounts}   kr. 30: ${ numDiscounts - numPostInvoices }   kr. 0: ${numPostInvoices}
     Leiebrikker:  ${options.rentalDevices ?? 0} stk
+
+    Resultater:   
     `
     .trim()
     .replace(/^ {4}/gm, "");
 
+  pre.append("   ", ...createInternalLinks(doc, "Res", resultList));
+  // TODO append split times links
+
   return pre;
+};
+
+const createInternalLinks = (
+  doc: Document,
+  prefix: string,
+  resultlist: ResultList,
+): Node[] => {
+  const a =
+    resultlist.classResult?.map((c, index) => {
+      const name = getClassName(c);
+      const numParticipants = c.personResult?.length ?? 0;
+
+      const element = doc.createElement("a");
+      element.setAttribute("href", "#" + prefix + (index + 1));
+      element.textContent = `${name}(${numParticipants})`;
+
+      const withSep: Node[] = [element];
+
+      if (index != (resultlist.classResult?.length ?? 0) - 1) {
+        withSep.push(doc.createTextNode("| "));
+      }
+      return withSep;
+    }) ?? [];
+
+  return a.flat();
 };

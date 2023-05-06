@@ -1,10 +1,12 @@
+import { writeFileSync } from "fs";
 import { ResultList } from "./model";
 
 import { JSDOM } from "jsdom";
 
-import result_ from "./resources/res2021-09-18.json" assert { type: "json"};
+import result_ from "./resources/res2021-09-18.json" assert { type: "json" };
 
 import { createResultListHeader } from "./generateResultListHeader.js";
+import { createResultList } from "./generateResultList.js";
 
 export type YearDistribution = {
   /** 21 years or more */
@@ -44,9 +46,9 @@ export type ResultListOptions = {
   rentalDevices?: number;
 };
 
-export const createResultList = (
+export const createResultListDocument = (
   resultList: ResultList,
-  options: ResultListOptions
+  options: ResultListOptions,
 ) => {
   const generatorName = "Webbotime";
   const generatorVersion = "1.0.0";
@@ -58,7 +60,7 @@ export const createResultList = (
         <meta name="Generator" content="${generatorName} ${generatorVersion}">
       </head>
       <body></body>
-    </html>`
+    </html>`,
   );
 
   const doc = dom.window.document;
@@ -69,17 +71,18 @@ export const createResultList = (
   header.textContent = doc.title;
   doc.body.append(header);
 
-  doc.body.append(createResultListHeader(doc, options, resultList));
+  doc.body.append(createResultListHeader(dom, options, resultList));
+  doc.body.append(...createResultList(dom, resultList));
 
-  // TODO append result list links
-  // TODO append split times links
+  // TODO append split times
 
   console.log(dom.serialize());
+  writeFileSync("dist/resultList.html", dom.serialize());
 
   return "";
 };
 
-createResultList(result_.resultList as ResultList, {
+createResultListDocument(result_.resultList as ResultList, {
   isoDate: "2021-09-18",
   place: "Svartkulp",
   map: "Sognsvann",
