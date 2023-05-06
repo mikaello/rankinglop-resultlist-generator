@@ -1,3 +1,6 @@
+import { ResultListOptions, YearDistribution } from ".";
+import { ResultList } from "./model";
+
 type ClubRegex = { clubName: string; clubRegex: RegExp };
 
 type ClubParticipation = { clubName: string; count: number };
