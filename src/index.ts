@@ -2,11 +2,11 @@ import { ResultList } from "./model";
 
 import { JSDOM } from "jsdom";
 
-import result_ from "./resources/res2021-09-18.json";
+import result_ from "./resources/res2021-09-18.json" assert { type: "json"};
 
-import { createResultListHeader } from "./generateResultListHeader";
+import { createResultListHeader } from "./generateResultListHeader.js";
 
-type YearDistribution = {
+export type YearDistribution = {
   /** 21 years or more */
   adults?: number;
   /** 17-20 years */
@@ -17,7 +17,7 @@ type YearDistribution = {
   child?: number;
 };
 
-type ResultListOptions = {
+export type ResultListOptions = {
   /** Title of this race */
   title?: string;
 
