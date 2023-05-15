@@ -6,7 +6,7 @@
   "module": "dist/index.js",
   "type": "module",
   "dependencies": {
-    "jsdom": "^17.0.0",
+    "jsdom": "^22.0.0",
     "typescript": "^5.0.4"
   },
   "scripts": {
