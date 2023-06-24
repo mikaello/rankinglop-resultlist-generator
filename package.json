@@ -33,6 +33,6 @@
     "proseWrap": "always"
   },
   "devDependencies": {
-    "@types/jsdom": "^16.2.13"
+    "@types/jsdom": "^21.0.0"
   }
 }
