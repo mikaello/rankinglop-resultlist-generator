@@ -10,11 +10,11 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
-    "jsdom": "^22.0.0",
-    "typescript": "^5.0.4"
+    "jsdom": "22.1.0",
+    "typescript": "5.9.2"
   },
   "devDependencies": {
-    "@types/jsdom": "^21.0.0"
+    "@types/jsdom": "21.1.7"
   },
   "repository": {
     "type": "git",
