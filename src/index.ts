@@ -3,7 +3,7 @@ import { ResultList } from "./model";
 
 import { JSDOM } from "jsdom";
 
-import result_ from "./resources/res2021-09-18.json" assert { type: "json" };
+import result_ from "./resources/res2021-09-18.json" with { type: "json" };
 
 import { createResultListHeader } from "./generateResultListHeader.js";
 import { createResultList } from "./generateResultList.js";
