@@ -148,17 +148,21 @@ function createSplitTimesTable(
 	const controlCodes =
 		firstWithSplits.result?.[0]?.splitTime?.map((st) => st.controlCode ?? "") ??
 		[];
-	const n = controlCodes.length;
+	// n = number of legs: one per intermediate control + one finish leg (last control → Mål)
+	const n = controlCodes.length + 1;
 
-	// Compute leg times and cumulative times for every finisher
+	// Compute leg times and cumulative times for every finisher.
+	// Index 0..n-2 correspond to intermediate controls; index n-1 is the finish leg.
 	const allPersonData = okResults.map((pr) => {
 		const result = pr.result?.[0];
 		const splitTimes = result?.splitTime ?? [];
 		const timeByCode = new Map(
 			splitTimes.map((st) => [st.controlCode ?? "", st.time]),
 		);
-		const cumulTimes = controlCodes.map((code) => timeByCode.get(code));
-		const legTimes = controlCodes.map((code, i) => {
+		const cumulTimes: (number | undefined)[] = controlCodes.map((code) =>
+			timeByCode.get(code),
+		);
+		const legTimes: (number | undefined)[] = controlCodes.map((code, i) => {
 			const cumulative = timeByCode.get(code);
 			if (cumulative === undefined) return undefined;
 			const prevCode = i > 0 ? controlCodes[i - 1] : undefined;
@@ -166,11 +170,20 @@ function createSplitTimesTable(
 				prevCode !== undefined ? (timeByCode.get(prevCode) ?? 0) : 0;
 			return cumulative - prevCumulative;
 		});
+		// Finish leg: total time minus last intermediate cumulative
+		const lastCumul = cumulTimes[n - 2];
+		const finishTime = result?.time;
+		legTimes.push(
+			finishTime !== undefined && lastCumul !== undefined
+				? finishTime - lastCumul
+				: undefined,
+		);
+		cumulTimes.push(finishTime);
 		return { pr, result, legTimes, cumulTimes };
 	});
 
-	// Best and second-best leg time per column
-	const bestLegTime: number[] = controlCodes.map((_, colIdx) => {
+	// Best and second-best leg time per column (0..n-1)
+	const bestLegTime: number[] = Array.from({ length: n }, (_, colIdx) => {
 		let best = Number.POSITIVE_INFINITY;
 		for (const { legTimes } of allPersonData) {
 			const t = legTimes[colIdx];
@@ -179,7 +192,7 @@ function createSplitTimesTable(
 		return best;
 	});
 
-	const secondBestLegTime: number[] = controlCodes.map((_, colIdx) => {
+	const secondBestLegTime: number[] = Array.from({ length: n }, (_, colIdx) => {
 		let second = Number.POSITIVE_INFINITY;
 		const best = bestLegTime[colIdx];
 		for (const { legTimes } of allPersonData) {
@@ -189,8 +202,8 @@ function createSplitTimesTable(
 		return second;
 	});
 
-	// Best and second-best cumulative time per column
-	const bestCumulTime: number[] = controlCodes.map((_, colIdx) => {
+	// Best and second-best cumulative time per column (0..n-1)
+	const bestCumulTime: number[] = Array.from({ length: n }, (_, colIdx) => {
 		let best = Number.POSITIVE_INFINITY;
 		for (const { cumulTimes } of allPersonData) {
 			const t = cumulTimes[colIdx];
@@ -199,22 +212,27 @@ function createSplitTimesTable(
 		return best;
 	});
 
-	const secondBestCumulTime: number[] = controlCodes.map((_, colIdx) => {
-		let second = Number.POSITIVE_INFINITY;
-		const best = bestCumulTime[colIdx];
-		for (const { cumulTimes } of allPersonData) {
-			const t = cumulTimes[colIdx];
-			if (t !== undefined && t > best && t < second) second = t;
-		}
-		return second;
-	});
+	const secondBestCumulTime: number[] = Array.from(
+		{ length: n },
+		(_, colIdx) => {
+			let second = Number.POSITIVE_INFINITY;
+			const best = bestCumulTime[colIdx];
+			for (const { cumulTimes } of allPersonData) {
+				const t = cumulTimes[colIdx];
+				if (t !== undefined && t > best && t < second) second = t;
+			}
+			return second;
+		},
+	);
 
-	const headerCells = controlCodes
-		.map(
+	// Header: intermediate controls include code in parens; finish leg has no code
+	const headerCells = [
+		...controlCodes.map(
 			(code, i) =>
 				`<th>${escapeHtml(splitLegLabel(i, n))} (${escapeHtml(code)})</th>`,
-		)
-		.join("");
+		),
+		`<th>${escapeHtml(splitLegLabel(n - 1, n))}</th>`,
+	].join("");
 
 	const tbodies = allPersonData
 		.map(({ pr, result, legTimes, cumulTimes }) => {
@@ -227,35 +245,31 @@ function createSplitTimesTable(
 					? `<br><span class="time-behind">${escapeHtml(formatTimeBehind(result.timeBehind))}</span>`
 					: "";
 
-			const legCells = controlCodes
-				.map((_, i) => {
-					const legTime = legTimes[i];
-					if (legTime === undefined) return "<td>–</td>";
-					const isBest = legTime === bestLegTime[i];
-					const isSecond = !isBest && legTime === secondBestLegTime[i];
-					const attr = isBest
-						? ' class="best-split"'
-						: isSecond
-							? ' class="second-split"'
-							: "";
-					return `<td${attr}>${escapeHtml(formatTime(legTime))}</td>`;
-				})
-				.join("");
+			const legCells = Array.from({ length: n }, (_, i) => {
+				const legTime = legTimes[i];
+				if (legTime === undefined) return "<td>–</td>";
+				const isBest = legTime === bestLegTime[i];
+				const isSecond = !isBest && legTime === secondBestLegTime[i];
+				const attr = isBest
+					? ' class="best-split"'
+					: isSecond
+						? ' class="second-split"'
+						: "";
+				return `<td${attr}>${escapeHtml(formatTime(legTime))}</td>`;
+			}).join("");
 
-			const cumulCells = controlCodes
-				.map((_, i) => {
-					const t = cumulTimes[i];
-					if (t === undefined) return "<td>–</td>";
-					const isBest = t === bestCumulTime[i];
-					const isSecond = !isBest && t === secondBestCumulTime[i];
-					const attr = isBest
-						? ' class="best-split"'
-						: isSecond
-							? ' class="second-split"'
-							: "";
-					return `<td${attr}>${escapeHtml(formatTime(t))}</td>`;
-				})
-				.join("");
+			const cumulCells = Array.from({ length: n }, (_, i) => {
+				const t = cumulTimes[i];
+				if (t === undefined) return "<td>–</td>";
+				const isBest = t === bestCumulTime[i];
+				const isSecond = !isBest && t === secondBestCumulTime[i];
+				const attr = isBest
+					? ' class="best-split"'
+					: isSecond
+						? ' class="second-split"'
+						: "";
+				return `<td${attr}>${escapeHtml(formatTime(t))}</td>`;
+			}).join("");
 
 			return `<tbody>
             <tr><td rowspan="2">${pos}</td><td rowspan="2">${name}</td>${legCells}<td rowspan="2">${totalTime}${diffStr}</td></tr>

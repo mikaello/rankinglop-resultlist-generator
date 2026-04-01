@@ -28,8 +28,7 @@
 ## Tech decisions
 
 ### Runtime: Node.js latest (no extra runtime needed)
-Stay on **Node.js** (v22 LTS or later). Node 22.6+ ships `--experimental-strip-types`
-and Node 23+ stabilised this as `--strip-types`. It runs TypeScript files directly
+Stay on **Node.js** (v22 LTS or later). It runs TypeScript files directly
 by stripping type annotations at load time — no compilation step, no `dist/` folder.
 
 This works perfectly for everything in this codebase: interfaces, type annotations,
@@ -37,23 +36,14 @@ generics. The only TypeScript features not supported are things this project doe
 not use (const enums, decorator metadata, namespaces).
 
 `typescript` becomes a devDependency used only for type-checking (`node --no-warnings
---experimental-strip-types src/index.ts` to run; `tsc --noEmit` to type-check).
-
-> **Why not Deno?** Deno 2 is a legitimate state-of-the-art choice — TypeScript
-> native, npm-compatible, built-in fmt/lint/test. It would work fine here. But
-> adding a new runtime for a simple CLI tool has a setup/familiarity cost with no
-> concrete benefit over modern Node. If this project grows into a Deno Deploy
-> serverless function, reconsider then.
->
-> **Why not Bun?** Bun offers nothing over Deno or modern Node for this use case.
-> It is not "more state of the art" — just a different trade-off.
+src/index.ts` to run; `tsc --noEmit` to type-check).
 
 Scripts simplify to:
 ```json
 "scripts": {
   "typecheck": "tsc --noEmit",
-  "start": "node --experimental-strip-types src/index.ts",
-  "test": "node --experimental-strip-types --test 'test/**/*.test.ts'"
+  "start": "node src/index.ts",
+  "test": "node --test 'test/**/*.test.ts'"
 }
 ```
 
@@ -114,6 +104,7 @@ Enforce via a `lint` script and in CI. Biome's defaults are sensible; add
   `chore: remove jsdom dependency`, `fix(html): escape XML-derived values`.
   Types: `feat`, `fix`, `chore`, `refactor`, `test`, `docs`.
 - If installing dependencies with npm, always use `--save-exact` option.
+- If adding documentation as markdown, adhere to the principle of one sentence per line.
 - **README must be kept up to date.** After Phase 1 is done, update `README.md`
   with a one-paragraph intro and minimal usage instructions (see implementation
   order step 10).
