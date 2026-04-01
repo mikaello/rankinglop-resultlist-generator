@@ -48,7 +48,7 @@ node src/index.ts --input result.xml > result.html
   "place": "Østmarksetra",
   "map": "Solbergvann",
   "organiserClub": "IL GeoForm",
-  "organiserPersons": ["Harald Iwe"],
+  "organiserPersons": ["Ola Nordmann"],
   "rentalDevices": 8,
   "yearDistribution": {
     "adults": 80,

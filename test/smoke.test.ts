@@ -61,9 +61,9 @@ describe("CLI smoke tests", () => {
 		assert.ok(stdout.includes("Melsom"), "should contain winner Melsom");
 	});
 
-	it("HTML contains OVT status for MissingPunch results", () => {
+	it("HTML contains MP status for MissingPunch results", () => {
 		const { stdout } = runCli(["--input", exampleXml]);
-		assert.ok(stdout.includes("OVT"), "should contain OVT status marker");
+		assert.ok(stdout.includes("MP"), "should contain MP status marker");
 	});
 
 	it("HTML contains split times section", () => {

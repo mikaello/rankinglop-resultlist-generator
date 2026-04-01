@@ -42,7 +42,7 @@ const CUSTOM_CSS = `
 function statusLabel(status: ResultStatus | undefined): string {
 	switch (status) {
 		case "MissingPunch":
-			return "OVT";
+			return "feilst";
 		case "Disqualified":
 			return "DSQ";
 		case "DidNotFinish":
@@ -134,15 +134,22 @@ function createSplitTimesTable(
 	classResult: ClassResult,
 	sectionId: string,
 ): string {
-	const okResults = (classResult.personResult ?? []).filter(
+	const allPersonResults = classResult.personResult ?? [];
+	const okResults = allPersonResults.filter(
 		(pr) => !pr.result?.[0]?.status || pr.result[0].status === "OK",
 	);
-
-	if (okResults.length === 0) return "";
-
-	const firstWithSplits = okResults.find(
-		(pr) => (pr.result?.[0]?.splitTime?.length ?? 0) > 0,
+	const nonOkWithSplits = allPersonResults.filter(
+		(pr) =>
+			pr.result?.[0]?.status &&
+			pr.result[0].status !== "OK" &&
+			(pr.result[0].splitTime?.length ?? 0) > 0,
 	);
+
+	if (okResults.length === 0 && nonOkWithSplits.length === 0) return "";
+
+	const firstWithSplits =
+		okResults.find((pr) => (pr.result?.[0]?.splitTime?.length ?? 0) > 0) ??
+		nonOkWithSplits[0];
 	if (!firstWithSplits) return "";
 
 	const controlCodes =
@@ -151,9 +158,9 @@ function createSplitTimesTable(
 	// n = number of legs: one per intermediate control + one finish leg (last control → Mål)
 	const n = controlCodes.length + 1;
 
-	// Compute leg times and cumulative times for every finisher.
+	// Compute leg times and cumulative times for all runners (OK first, non-OK at bottom).
 	// Index 0..n-2 correspond to intermediate controls; index n-1 is the finish leg.
-	const allPersonData = okResults.map((pr) => {
+	const allPersonData = [...okResults, ...nonOkWithSplits].map((pr) => {
 		const result = pr.result?.[0];
 		const splitTimes = result?.splitTime ?? [];
 		const timeByCode = new Map(
@@ -179,7 +186,11 @@ function createSplitTimesTable(
 				: undefined,
 		);
 		cumulTimes.push(finishTime);
-		return { pr, result, legTimes, cumulTimes };
+		const statusStr =
+			result?.status && result.status !== "OK"
+				? statusLabel(result.status)
+				: undefined;
+		return { pr, result, legTimes, cumulTimes, statusStr };
 	});
 
 	// Best and second-best leg time per column (0..n-1)
@@ -235,9 +246,9 @@ function createSplitTimesTable(
 	].join("");
 
 	const tbodies = allPersonData
-		.map(({ pr, result, legTimes, cumulTimes }) => {
+		.map(({ pr, result, legTimes, cumulTimes, statusStr }) => {
 			const name = escapeHtml(getName(pr.person));
-			const pos = result?.position ?? "–";
+			const pos = statusStr ?? String(result?.position ?? "–");
 			const totalTime =
 				result?.time !== undefined ? escapeHtml(formatTime(result.time)) : "–";
 			const diffStr =

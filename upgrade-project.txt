@@ -29,7 +29,7 @@
 
 ### Runtime: Node.js latest (no extra runtime needed)
 Stay on **Node.js** (v22 LTS or later). It runs TypeScript files directly
-by stripping type annotations at load time — no compilation step, no `dist/` folder.
+by stripping type annotations at load time — no compilation step, no `dist/` folder, no flags needed.
 
 This works perfectly for everything in this codebase: interfaces, type annotations,
 generics. The only TypeScript features not supported are things this project does
@@ -138,8 +138,8 @@ Rewrite the bottom of `index.ts` (currently a hard-coded invocation) to:
 
 Example:
 ```
-node --experimental-strip-types src/index.ts --input result.xml --config event.json --output result.html
-node --experimental-strip-types src/index.ts --input result.xml > result.html
+node src/index.ts --input result.xml --config event.json --output result.html
+node src/index.ts --input result.xml > result.html
 ```
 
 ### 1.4 Slim down `model.ts`
@@ -219,10 +219,10 @@ Use the `<SplitTime>` elements already present in the example XML.
 ### 3.5 Update/simplify `package.json` scripts
 ```json
 "scripts": {
-  "start": "node --experimental-strip-types src/index.ts",
+  "start": "node src/index.ts",
   "typecheck": "tsc --noEmit",
   "lint": "biome check --write .",
-  "test": "node --experimental-strip-types --test 'test/**/*.test.ts'"
+  "test": "node --test 'test/**/*.test.ts'"
 }
 ```
 Also:
@@ -244,7 +244,7 @@ Add a `.github/workflows/ci.yml` that runs on push and pull_request:
 ## Phase 3.6 — Tests and verification (lightweight)
 
 Use Node.js's built-in `node:test` runner — no test framework package needed.
-Write `.test.ts` files; Node runs them directly with `--experimental-strip-types`.
+Write `.test.ts` files; Node runs them directly.
 
 **`test/parseIofXml.test.ts`** — unit tests for the parser in isolation:
 - Parses `examples/example_iof_resultlist.xml` and checks the returned model
@@ -252,7 +252,7 @@ Write `.test.ts` files; Node runs them directly with `--experimental-strip-types
 - Fast feedback without touching HTML generation
 
 **`test/smoke.test.ts`** — end-to-end smoke test:
-- Spawns `node --experimental-strip-types src/index.ts --input examples/example_iof_resultlist.xml`
+- Spawns `node src/index.ts --input examples/example_iof_resultlist.xml`
   via `child_process.spawn` and captures stdout
 - Asserts the HTML output contains expected strings: `<!DOCTYPE html>`,
   event name in `<title>`, each class heading, the winner's name and time,
