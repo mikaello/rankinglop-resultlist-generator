@@ -1,10 +1,9 @@
-import { JSDOM } from "jsdom";
-import { ResultListOptions, YearDistribution } from ".";
-import { ResultList } from "./model";
-import { getClassName } from "./modelHelpers.js";
+import type { ResultListOptions, YearDistribution } from "./options.ts";
+import type { ResultList } from "./model.ts";
+import { getClassName, getOrganisationName } from "./modelHelpers.ts";
+import { escapeHtml } from "./escapeHtml.ts";
 
 type ClubRegex = { clubName: string; clubRegex: RegExp };
-
 type ClubParticipation = { clubName: string; count: number };
 
 export const getClubDistribution = (
@@ -15,15 +14,13 @@ export const getClubDistribution = (
     clubs.map((club) => [club.clubName, { clubName: club.clubName, count: 0 }]),
   );
 
-  resultList.classResult?.forEach((classType) =>
-    classType.personResult?.forEach((personResult) => {
+  resultList.classResult?.forEach((classResult) =>
+    classResult.personResult?.forEach((personResult) => {
       for (const c of clubs) {
-        const org = personResult.organisation?.name;
+        const org = getOrganisationName(personResult.organisation);
         if (org && c.clubRegex.test(org)) {
-          let club = clubP.get(c.clubName);
-          if (club) {
-            club.count++;
-          }
+          const club = clubP.get(c.clubName);
+          if (club) club.count++;
           break;
         }
       }
@@ -36,11 +33,10 @@ export const getClubDistribution = (
 const getNumDiscountPrice = (
   yearDistribution: YearDistribution,
   clubDistribution: ClubParticipation[],
-) => {
+): number => {
   const discountClubs = clubDistribution.filter((club) =>
     /(DNV|GeoForm|OSI|Oslostudentenes)/i.test(club.clubName),
   );
-
   return (
     discountClubs.reduce((acc, curr) => acc + curr.count, 0) +
     (yearDistribution.child ?? 0) +
@@ -48,97 +44,92 @@ const getNumDiscountPrice = (
   );
 };
 
-const getNumPostInvoicing = (getClubDistribution: ClubParticipation[]) => {
-  return getClubDistribution.find((club) => club.clubName == "DNV")?.count ?? 0;
+const getNumPostInvoicing = (clubDistribution: ClubParticipation[]): number => {
+  return clubDistribution.find((club) => club.clubName === "DNV")?.count ?? 0;
 };
 
 export const createResultListHeader = (
-  { window: { document: doc, DOMParser } }: JSDOM,
   options: ResultListOptions,
   resultList: ResultList,
-): HTMLElement => {
-  let pre = doc.createElement("pre");
-
+): string => {
   const raceDate = options.isoDate ? new Date(options.isoDate) : new Date();
-  const dateOptions = {
+  const dateOptions: Intl.DateTimeFormatOptions = {
     year: "numeric",
     month: "long",
     day: "numeric",
   };
-  //@ts-ignore
   const localeRaceDate = raceDate.toLocaleDateString("nb-NO", dateOptions);
 
   const clubDistribution = getClubDistribution(
     [
-      { clubName: "GeoForm", clubRegex: new RegExp(/GeoForm/i) },
-      { clubName: "OSI", clubRegex: new RegExp(/(OSI|Oslostudentene)/i) },
-      { clubName: "DNV", clubRegex: new RegExp(/(DNV|ESSO|Veritas|VBIL)/i) },
-      { clubName: "Andre", clubRegex: new RegExp(/.*/i) },
+      { clubName: "GeoForm", clubRegex: /GeoForm/i },
+      { clubName: "OSI", clubRegex: /(OSI|Oslostudentene)/i },
+      { clubName: "DNV", clubRegex: /(DNV|ESSO|Veritas|VBIL)/i },
+      { clubName: "Andre", clubRegex: /.*/i },
     ],
     resultList,
   );
-  const distributionStr =
-    clubDistribution.length > 0
-      ? `(${clubDistribution
-          .map((d) => `${d.clubName}: ${d.count}`)
-          .join(", ")})`
-      : "";
 
   const totalParticipation = clubDistribution.reduce(
     (acc, curr) => acc + curr.count,
     0,
   );
 
+  const distributionStr =
+    clubDistribution.length > 0
+      ? `(${clubDistribution.map((d) => `${escapeHtml(d.clubName)}: ${d.count}`).join(", ")})`
+      : "";
+
   const yearDistribution = options.yearDistribution
     ? { ...options.yearDistribution }
-    : { adult: totalParticipation, oldTeenager: 0, youngTeenager: 0, child: 0 };
+    : {
+        adults: totalParticipation,
+        oldTeenager: 0,
+        youngTeenager: 0,
+        child: 0,
+      };
 
   const numDiscounts = getNumDiscountPrice(yearDistribution, clubDistribution);
   const numPostInvoices = getNumPostInvoicing(clubDistribution);
 
-  // prettier-ignore
-  pre.textContent = `
-    Data/sted:    ${ localeRaceDate } ${options.place ? "- " + options.place : ""}
-    Kart:         ${options.map ?? ""}
-    Arr:          ${options.organiserClub ?? "GeoForm"} v/${ options.organiserPersons?.join(", ") ?? "" }
-    Antall:       Totalt: ${totalParticipation} ${distributionStr}
-    Løpsrapport:  Alder:  21-: ${yearDistribution.adult ?? 0},  17-20: ${ yearDistribution.oldTeenager ?? 0 },  13-16: ${yearDistribution.youngTeenager ?? 0},  0-12: ${ yearDistribution.child ?? 0 }
-    Startkont:    kr. 50: ${ totalParticipation - numDiscounts }   kr. 30: ${numDiscounts}   kr. 0: 0
-    Betalt:       kr. 50: ${totalParticipation - numDiscounts}   kr. 30: ${ numDiscounts - numPostInvoices }   kr. 0: ${numPostInvoices}
-    Leiebrikker:  ${options.rentalDevices ?? 0} stk
+  const place = options.place ? ` - ${escapeHtml(options.place)}` : "";
+  const map = escapeHtml(options.map ?? "");
+  const organiserClub = escapeHtml(options.organiserClub ?? "GeoForm");
+  const organiserPersons = (options.organiserPersons ?? [])
+    .map(escapeHtml)
+    .join(", ");
+  const arrStr = organiserPersons
+    ? `${organiserClub} v/${organiserPersons}`
+    : organiserClub;
 
-    Resultater:   
-    `
-    .trim()
-    .replace(/^ {4}/gm, "");
+  const navLinks = (resultList.classResult ?? [])
+    .map((cr, i) => {
+      const name = escapeHtml(getClassName(cr));
+      const count = cr.personResult?.length ?? 0;
+      return `<li><a href="#class-${i}">${name} (${count})</a></li>
+        <li><a href="#splits-${i}">${name} strekktider</a></li>`;
+    })
+    .join("\n        ");
 
-  pre.append("   ", ...createInternalLinks(doc, "Res", resultList));
-  // TODO append split times links
-
-  return pre;
-};
-
-const createInternalLinks = (
-  doc: Document,
-  prefix: string,
-  resultlist: ResultList,
-): Node[] => {
-  const a =
-    resultlist.classResult?.map((c, index) => {
-      const name = getClassName(c);
-      const numParticipants = c.personResult?.length ?? 0;
-
-      const element = doc.createElement("a");
-      element.setAttribute("href", "#" + prefix + (index + 1));
-      element.textContent = `${name}(${numParticipants})`;
-
-      const withSep: Node[] = [element];
-
-      if (index != (resultlist.classResult?.length ?? 0) - 1) {
-        withSep.push(doc.createTextNode("| "));
-      }
-      return withSep;
-    }) ?? [];
-
-  return a.flat();
+  return `
+  <header>
+    <hgroup>
+      <h1>${escapeHtml(options.title ?? resultList.event?.name ?? "Rankingløp")}</h1>
+    </hgroup>
+    <dl>
+      <dt>Dato/sted</dt><dd>${escapeHtml(localeRaceDate)}${place}</dd>
+      <dt>Kart</dt><dd>${map}</dd>
+      <dt>Arr</dt><dd>${arrStr}</dd>
+      <dt>Antall</dt><dd>Totalt: ${totalParticipation} ${distributionStr}</dd>
+      <dt>Løpsrapport</dt><dd>Alder: 21-: ${yearDistribution.adults ?? 0}, 17-20: ${yearDistribution.oldTeenager ?? 0}, 13-16: ${yearDistribution.youngTeenager ?? 0}, 0-12: ${yearDistribution.child ?? 0}</dd>
+      <dt>Startkont</dt><dd>kr. 50: ${totalParticipation - numDiscounts} &nbsp; kr. 30: ${numDiscounts} &nbsp; kr. 0: 0</dd>
+      <dt>Betalt</dt><dd>kr. 50: ${totalParticipation - numDiscounts} &nbsp; kr. 30: ${numDiscounts - numPostInvoices} &nbsp; kr. 0: ${numPostInvoices}</dd>
+      <dt>Leiebrikker</dt><dd>${options.rentalDevices ?? 0} stk</dd>
+    </dl>
+  </header>
+  <nav>
+    <ul>
+      ${navLinks}
+    </ul>
+  </nav>`;
 };

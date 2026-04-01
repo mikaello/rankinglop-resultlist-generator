@@ -1,91 +1,84 @@
-import { writeFileSync } from "fs";
-import { ResultList } from "./model";
+import { readFileSync, writeFileSync } from "node:fs";
+import { parseIofXml } from "./parseIofXml.ts";
+import { createResultListDocument } from "./generateResultList.ts";
+import type { ResultListOptions } from "./options.ts";
 
-import { JSDOM } from "jsdom";
+// Re-export types for library usage
+export type { ResultListOptions, YearDistribution } from "./options.ts";
 
-import result_ from "./resources/res2021-09-18.json" with { type: "json" };
+function printUsage(): void {
+  console.error(
+    `Usage: node --experimental-strip-types src/index.ts --input <file.xml> [--config <options.json>] [--output <file.html>]
 
-import { createResultListHeader } from "./generateResultListHeader.js";
-import { createResultList } from "./generateResultList.js";
+Options:
+  --input  <file.xml>       IOF 3.0 XML result list (required)
+  --config <options.json>   Event metadata (organiser, place, map, etc.) in JSON
+  --output <file.html>      Output file (default: stdout)
 
-export type YearDistribution = {
-  /** 21 years or more */
-  adults?: number;
-  /** 17-20 years */
-  oldTeenager?: number;
-  /** 13-16 years */
-  youngTeenager?: number;
-  /** 0-12 years */
-  child?: number;
-};
+If --output is omitted, the generated HTML is written to stdout.
 
-export type ResultListOptions = {
-  /** Title of this race */
-  title?: string;
-
-  /** Date of the event in ISO 8601 date format (YYYY-MM-DD) */
-  isoDate?: string;
-
-  /** Location of the event */
-  place?: string;
-
-  /** Which map was used, e.g. "Sognsvann" */
-  map?: string;
-
-  /** Which club was organising the event, e.g. "OSI" */
-  organiserClub?: string;
-
-  /** Which persons were organising the event, e.g. "Bern Nordmand" */
-  organiserPersons?: string[];
-
-  /** How old were the participants */
-  yearDistribution?: YearDistribution;
-
-  startContingent?: { amount: number; quota: "number" }[];
-
-  rentalDevices?: number;
-};
-
-export const createResultListDocument = (
-  resultList: ResultList,
-  options: ResultListOptions,
-) => {
-  const generatorName = "Webbotime";
-  const generatorVersion = "1.0.0";
-  const dom = new JSDOM(
-    `<!DOCTYPE html>
-    <html>
-      <head>
-        <meta HTTP-EQUIV="Content-Type" content="text/html; charset=UTF-8">
-        <meta name="Generator" content="${generatorName} ${generatorVersion}">
-      </head>
-      <body></body>
-    </html>`,
+Example config JSON:
+  {
+    "title": "Rankingløp 1 - 2024",
+    "isoDate": "2024-05-08",
+    "place": "Østmarksetra",
+    "map": "Solbergvann",
+    "organiserClub": "IL GeoForm",
+    "organiserPersons": ["Harald Iwe"],
+    "rentalDevices": 8
+  }
+`,
   );
+}
 
-  const doc = dom.window.document;
+function parseArgs(argv: string[]): {
+  input?: string;
+  config?: string;
+  output?: string;
+} {
+  const args: { input?: string; config?: string; output?: string } = {};
+  for (let i = 0; i < argv.length; i++) {
+    if (argv[i] === "--input" && argv[i + 1]) {
+      args.input = argv[++i];
+    } else if (argv[i] === "--config" && argv[i + 1]) {
+      args.config = argv[++i];
+    } else if (argv[i] === "--output" && argv[i + 1]) {
+      args.output = argv[++i];
+    }
+  }
+  return args;
+}
 
-  // Add titles
-  doc.title = options.title ?? resultList.event?.name ?? "Rankingløp";
-  let header = doc.createElement("h1");
-  header.textContent = doc.title;
-  doc.body.append(header);
+const args = parseArgs(process.argv.slice(2));
 
-  doc.body.append(createResultListHeader(dom, options, resultList));
-  doc.body.append(...createResultList(dom, resultList));
+if (!args.input) {
+  console.error("Error: --input is required.\n");
+  printUsage();
+  process.exit(1);
+}
 
-  // TODO append split times
+let options: ResultListOptions = {};
+if (args.config) {
+  try {
+    options = JSON.parse(readFileSync(args.config, "utf8")) as ResultListOptions;
+  } catch (err) {
+    console.error(`Error reading config file: ${args.config}\n${err}`);
+    process.exit(1);
+  }
+}
 
-  console.log(dom.serialize());
-  writeFileSync("dist/resultList.html", dom.serialize());
+let resultList;
+try {
+  resultList = parseIofXml(args.input);
+} catch (err) {
+  console.error(`Error parsing XML: ${args.input}\n${err}`);
+  process.exit(1);
+}
 
-  return "";
-};
+const html = createResultListDocument(resultList, options);
 
-createResultListDocument(result_.resultList as ResultList, {
-  isoDate: "2021-09-18",
-  place: "Svartkulp",
-  map: "Sognsvann",
-  organiserClub: "OSI",
-  organiserPersons: ["Magne Vollen", "Lenny Enström"],
-});
+if (args.output) {
+  writeFileSync(args.output, html, "utf8");
+} else {
+  process.stdout.write(html);
+}
