@@ -1,0 +1,301 @@
+# Upgrade gameplan
+
+## Current state (problems to fix)
+
+- **No XML parsing.** The main entry point imports a hard-coded JSON file
+  (`res2021-09-18.json`) instead of reading an IOF XML file. The example XML in
+  `examples/` is never actually parsed.
+- **No CLI interface.** There are no command-line arguments; the file to process
+  and the event metadata are baked directly into `index.ts`.
+- **Heavyweight DOM dependency for HTML generation.** `jsdom` is used solely to
+  build HTML strings. Template literals are simpler, lighter, and produce the
+  same result.
+- **Output is monospaced `<pre>` blocks.** The generated HTML uses fixed-width
+  text tables that are unreadable on mobile and look dated.
+- **Oversized model file.** `model.ts` is an auto-generated Eventor API model
+  (~1000+ lines). Only a small subset of it is used; the rest is noise.
+- **Incomplete result handling.** DNS, DNF, DSQ, OVT, and other statuses are
+  not displayed.
+- **Split times not implemented.** Two TODO comments mark this as missing.
+- **TypeScript issues.** There is a `@ts-ignore` for `toLocaleDateString`, and
+  the duplicate function block in `generateResultListHeader.ts` should be cleaned
+  up.
+- **Scores/points column.** The old HTML shows a "Poeng" (ranking points) column
+  but the current code does not compute or display it.
+
+---
+
+## Tech decisions
+
+### Runtime: Node.js latest (no extra runtime needed)
+Stay on **Node.js** (v22 LTS or later). Node 22.6+ ships `--experimental-strip-types`
+and Node 23+ stabilised this as `--strip-types`. It runs TypeScript files directly
+by stripping type annotations at load time — no compilation step, no `dist/` folder.
+
+This works perfectly for everything in this codebase: interfaces, type annotations,
+generics. The only TypeScript features not supported are things this project does
+not use (const enums, decorator metadata, namespaces).
+
+`typescript` becomes a devDependency used only for type-checking (`node --no-warnings
+--experimental-strip-types src/index.ts` to run; `tsc --noEmit` to type-check).
+
+> **Why not Deno?** Deno 2 is a legitimate state-of-the-art choice — TypeScript
+> native, npm-compatible, built-in fmt/lint/test. It would work fine here. But
+> adding a new runtime for a simple CLI tool has a setup/familiarity cost with no
+> concrete benefit over modern Node. If this project grows into a Deno Deploy
+> serverless function, reconsider then.
+>
+> **Why not Bun?** Bun offers nothing over Deno or modern Node for this use case.
+> It is not "more state of the art" — just a different trade-off.
+
+Scripts simplify to:
+```json
+"scripts": {
+  "typecheck": "tsc --noEmit",
+  "start": "node --experimental-strip-types src/index.ts",
+  "test": "node --experimental-strip-types --test 'test/**/*.test.ts'"
+}
+```
+
+### XML parser: `fast-xml-parser`
+Keep this choice. Actively maintained, zero runtime dependencies, good
+TypeScript support, and handles both UTF-8 and ISO-8859-1 (Otime export
+encoding).
+
+### HTML generation: template literals + `escapeHtml()`
+Template literals are the right call over jsdom. **Important:** athlete names,
+club names, and event names come from untrusted XML input and must be
+HTML-escaped before interpolation to prevent XSS. Add a small `escapeHtml()`
+helper (escapes `&`, `<`, `>`, `"`, `'`) and apply it to every value
+interpolated from the parsed XML.
+
+### CSS: Pico CSS classless
+Keep this choice. ~10 kB, no class names needed, styles semantic HTML
+(`<table>`, `<header>`, `<nav>`, `<section>`) automatically — ideal for a
+single self-contained output file.
+
+### TypeScript config: modernise
+Update `tsconfig.json`:
+- `"target": "ESNext"` — no legacy runtime to support
+- `"moduleResolution": "bundler"` — replaces the deprecated `"node"` value
+- `"strict": true` — catches real bugs; not currently enabled
+- Remove all emit settings (`outDir`, `rootDir`, etc.) — Bun handles execution,
+  tsconfig is type-checking only
+- Keep `"resolveJsonModule": true`
+
+### Testing: `node:test`
+Use Node.js's built-in `node:test` runner. No test framework package needed.
+Write `.test.ts` files and run them directly via `--experimental-strip-types`.
+Structured `describe`/`it`/`assert` output, no extra dependencies.
+
+### Linting and formatting: Biome
+Add **Biome** as a devDependency. It replaces ESLint + Prettier in a single
+binary with near-instant execution.
+
+```
+npm install --save-dev --save-exact @biomejs/biome
+npx biome init
+```
+
+Enforce via a `lint` script and in CI. Biome's defaults are sensible; add
+`biome.json` to the repo to pin the config.
+
+---
+
+## Working conventions
+
+- **Run `npm test` and `npm run lint` after every meaningful change.** Don't
+  let failures accumulate.
+- **Commit after each phase and after each numbered subphase** where it makes
+  sense as a standalone change.
+- Update this game plan document as you progress.
+- **Conventional commits, no emojis, brief subject lines.** Format:
+  `type(scope): short description` — e.g. `feat(parser): add IOF XML parser`,
+  `chore: remove jsdom dependency`, `fix(html): escape XML-derived values`.
+  Types: `feat`, `fix`, `chore`, `refactor`, `test`, `docs`.
+- If installing dependencies with npm, always use `--save-exact` option.
+- **README must be kept up to date.** After Phase 1 is done, update `README.md`
+  with a one-paragraph intro and minimal usage instructions (see implementation
+  order step 10).
+
+---
+
+## Phase 1 — Core plumbing (make the tool actually work)
+
+### 1.1 Add an XML parser
+Add `fast-xml-parser` as a dependency. It is lightweight, has no runtime
+dependencies, and handles the ISO-8859-1 encoding used by Otime exports.
+
+```
+npm install --save-exact fast-xml-parser
+```
+
+### 1.2 Write an IOF 3.0 XML → model parser
+Create `src/parseIofXml.ts` that:
+- Reads the XML file using `fs.readFileSync` (sync is fine for a CLI)
+- Calls `fast-xml-parser` to get a plain JS object
+- Maps the result to the trimmed `ResultList` model (see 1.4)
+- Handles both UTF-8 and ISO-8859-1 encoding transparently
+
+### 1.3 Create a proper CLI entry point
+Rewrite the bottom of `index.ts` (currently a hard-coded invocation) to:
+- Accept `--input <file.xml>` or read from stdin
+- Accept `--output <file.html>` (default: stdout, so it can be piped)
+- Accept `--config <options.json>` for event metadata that is not in the XML
+  (organiser, venue, rental devices, year distribution, start fee amounts, etc.)
+- Print usage and exit with a non-zero code on bad input
+
+Example:
+```
+node --experimental-strip-types src/index.ts --input result.xml --config event.json --output result.html
+node --experimental-strip-types src/index.ts --input result.xml > result.html
+```
+
+### 1.4 Slim down `model.ts`
+Keep only the interfaces actually needed for a result list:
+`ResultList`, `ClassResult`, `PersonResult`, `Result`, `SplitTime`,
+`Person`, `Organisation`, `Event`, `Course`, `Id`, `Name`, `SplitTime`.
+Delete the rest of the auto-generated Eventor API types.
+
+---
+
+## Phase 2 — Modern HTML output
+
+### 2.1 Drop `jsdom`, use template literals
+Replace all JSDOM-based HTML construction in `generateResultList.ts` and
+`generateResultListHeader.ts` with plain TypeScript template-literal functions
+that return `string`. This removes the `jsdom` / `@types/jsdom` dependency
+entirely.
+
+### 2.2 Integrate Pico CSS
+Embed Pico CSS (classless flavour, minified, ~10 kB) inline in the `<style>`
+tag so the output is a single fully self-contained HTML file with no external
+requests. Classless Pico styles semantic HTML elements (`<table>`, `<header>`,
+`<section>`, `<h1>`–`<h3>`) automatically.
+
+Reference: https://picocss.com/docs/classless
+
+### 2.3 Replace `<pre>` columns with an HTML table per class
+Each orienteering class gets a `<section>` with:
+- An `<h3>` heading: class name + course length
+- A `<table>` with columns: **Place**, **Name**, **Club**, **Time**, **+Behind**
+- Status rows (DNS, DNF, DSQ, OVT, …) shown at the bottom of each table in a
+  distinct style (e.g. `<td>` with muted colour, no place number)
+
+### 2.4 Responsive event header
+Replace the `<pre>` header block with a `<header>` / `<dl>` (description list)
+structure:
+```
+Date/place | Map | Organiser | Entries | …
+```
+This collapses naturally on narrow screens.
+
+### 2.5 Navigation / table of contents
+Replace the inline `<a name="Res1">` anchor approach with a `<nav>` element at
+the top containing links to each class section using standard `id` attributes.
+
+---
+
+## Phase 3 — Completeness and correctness
+
+### 3.1 Handle all result statuses
+Map IOF `<Status>` values to display text:
+| IOF status | Display |
+|------------|---------|
+| OK         | place number |
+| DNS        | DNS |
+| DNF        | DNF |
+| DSQ        | DSQ |
+| OVT / MisPunch | OVT |
+| NotCompeting | NC |
+
+### 3.2 Ranking points column
+The old output has a "Poeng" column. Ranking points are not in the IOF XML
+(they are computed externally), so this column is omitted unless a future
+config option supplies them per-person. Leave a note in the code as a TODO.
+
+### 3.3 Split times section
+Implement the split times tables that are currently TODO. Each class gets a
+second table below the results table showing leg times for all finishers.
+Use the `<SplitTime>` elements already present in the example XML.
+
+### 3.4 Fix remaining TypeScript issues
+- Remove the `@ts-ignore` by typing `dateOptions` as `Intl.DateTimeFormatOptions`.
+- Update `tsconfig.json` per the Tech decisions section above:
+  `target: ESNext`, `moduleResolution: bundler`, `strict: true`, remove emit settings.
+- Ensure every XML-derived value passed into template literals is wrapped in `escapeHtml()`.
+
+### 3.5 Update/simplify `package.json` scripts
+```json
+"scripts": {
+  "start": "node --experimental-strip-types src/index.ts",
+  "typecheck": "tsc --noEmit",
+  "lint": "biome check --write .",
+  "test": "node --experimental-strip-types --test 'test/**/*.test.ts'"
+}
+```
+Also:
+- Move `typescript` from `dependencies` to `devDependencies`
+- Add `@biomejs/biome` to `devDependencies`
+- Remove `jsdom` and `@types/jsdom` entirely
+- Remove `main`/`module` fields pointing at `dist/` — there is no build output
+
+Add a `.github/workflows/ci.yml` that runs on push and pull_request:
+```yaml
+- run: npm ci
+- run: npm run typecheck
+- run: npm run lint
+- run: npm test
+```
+
+---
+
+## Phase 3.6 — Tests and verification (lightweight)
+
+Use Node.js's built-in `node:test` runner — no test framework package needed.
+Write `.test.ts` files; Node runs them directly with `--experimental-strip-types`.
+
+**`test/parseIofXml.test.ts`** — unit tests for the parser in isolation:
+- Parses `examples/example_iof_resultlist.xml` and checks the returned model
+- Asserts class count, first result name and time, course lengths
+- Fast feedback without touching HTML generation
+
+**`test/smoke.test.ts`** — end-to-end smoke test:
+- Spawns `node --experimental-strip-types src/index.ts --input examples/example_iof_resultlist.xml`
+  via `child_process.spawn` and captures stdout
+- Asserts the HTML output contains expected strings: `<!DOCTYPE html>`,
+  event name in `<title>`, each class heading, the winner's name and time,
+  and DNS/DNF/DSQ markers where present in the data
+
+Both files use `describe` / `it` / `assert` from `node:test` and `node:assert`. Run with:
+```
+npm test
+```
+
+---
+
+## Phase 4 — Future iteration (do NOT implement now)
+
+- **Alpine.js interactivity**: collapsible class sections, client-side sort by
+  name/time/club, filter by club.
+- **Split time visualisation**: small bar-chart per leg using inline SVG or a
+  CSS-only approach.
+- **Serverless function wrapper**: wrap `createResultListDocument` as an AWS
+  Lambda / Cloudflare Worker handler that accepts a multipart XML upload and
+  returns the HTML.
+
+---
+
+## Suggested implementation order
+
+1. Phase 1.4 — slim down `model.ts` (quick win, unblocks type safety)
+2. Phase 1.2 — XML parser (`src/parseIofXml.ts`)
+3. Phase 1.3 — CLI entry point
+4. Phase 2.1 — drop `jsdom`
+5. Phase 2.2–2.5 — new HTML layout with Pico CSS
+6. Phase 3.1–3.2 — status handling + points note
+7. Phase 3.3 — split times
+8. Phase 3.4–3.5 — TS fixes, Biome, updated scripts, GitHub Actions CI
+9. Phase 3.6 — smoke tests and parser unit tests
+10. Update `README.md` — brief intro + usage instructions
+
