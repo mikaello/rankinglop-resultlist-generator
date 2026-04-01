@@ -1,22 +1,22 @@
 import { readFileSync } from "node:fs";
 import { createRequire } from "node:module";
-import type { ClassResult, ResultList, ResultStatus } from "./model.ts";
-import type { ResultListOptions } from "./options.ts";
-import {
-  formatTime,
-  formatTimeBehind,
-  getClassName,
-  getCourseLengthKm,
-  getName,
-  getOrganisationName,
-} from "./modelHelpers.ts";
-import { createResultListHeader } from "./generateResultListHeader.ts";
 import { escapeHtml } from "./escapeHtml.ts";
+import { createResultListHeader } from "./generateResultListHeader.ts";
+import type { ClassResult, ResultList, ResultStatus } from "./model.ts";
+import {
+	formatTime,
+	formatTimeBehind,
+	getClassName,
+	getCourseLengthKm,
+	getName,
+	getOrganisationName,
+} from "./modelHelpers.ts";
+import type { ResultListOptions } from "./options.ts";
 
 const _require = createRequire(import.meta.url);
 const picoCSS = readFileSync(
-  _require.resolve("@picocss/pico/css/pico.classless.min.css"),
-  "utf8",
+	_require.resolve("@picocss/pico/css/pico.classless.min.css"),
+	"utf8",
 );
 
 const CUSTOM_CSS = `
@@ -32,143 +32,144 @@ const CUSTOM_CSS = `
 `;
 
 function statusLabel(status: ResultStatus | undefined): string {
-  switch (status) {
-    case "MissingPunch":
-      return "OVT";
-    case "Disqualified":
-      return "DSQ";
-    case "DidNotFinish":
-      return "DNF";
-    case "OverTime":
-      return "OVT";
-    case "SportingWithdrawal":
-      return "Disk";
-    case "NotCompeting":
-      return "NC";
-    case "DidNotStart":
-    case "DidNotEnter":
-      return "DNS";
-    case "Cancelled":
-      return "Disk";
-    default:
-      return status ?? "–";
-  }
+	switch (status) {
+		case "MissingPunch":
+			return "OVT";
+		case "Disqualified":
+			return "DSQ";
+		case "DidNotFinish":
+			return "DNF";
+		case "OverTime":
+			return "OVT";
+		case "SportingWithdrawal":
+			return "Disk";
+		case "NotCompeting":
+			return "NC";
+		case "DidNotStart":
+		case "DidNotEnter":
+			return "DNS";
+		case "Cancelled":
+			return "Disk";
+		default:
+			return status ?? "–";
+	}
 }
 
 function statusCssClass(status: ResultStatus | undefined): string {
-  switch (status) {
-    case "MissingPunch":
-    case "OverTime":
-      return "status-ovt";
-    case "Disqualified":
-    case "SportingWithdrawal":
-    case "Cancelled":
-      return "status-dsq";
-    case "DidNotFinish":
-      return "status-dnf";
-    case "NotCompeting":
-      return "status-nc";
-    case "DidNotStart":
-    case "DidNotEnter":
-      return "status-dns";
-    default:
-      return "";
-  }
+	switch (status) {
+		case "MissingPunch":
+		case "OverTime":
+			return "status-ovt";
+		case "Disqualified":
+		case "SportingWithdrawal":
+		case "Cancelled":
+			return "status-dsq";
+		case "DidNotFinish":
+			return "status-dnf";
+		case "NotCompeting":
+			return "status-nc";
+		case "DidNotStart":
+		case "DidNotEnter":
+			return "status-dns";
+		default:
+			return "";
+	}
 }
 
 function createClassResultRows(classResult: ClassResult): string {
-  const finishers: string[] = [];
-  const nonFinishers: string[] = [];
+	const finishers: string[] = [];
+	const nonFinishers: string[] = [];
 
-  for (const pr of classResult.personResult ?? []) {
-    const result = pr.result?.[0];
-    const name = escapeHtml(getName(pr.person));
-    const club = escapeHtml(getOrganisationName(pr.organisation));
-    const status = result?.status;
+	for (const pr of classResult.personResult ?? []) {
+		const result = pr.result?.[0];
+		const name = escapeHtml(getName(pr.person));
+		const club = escapeHtml(getOrganisationName(pr.organisation));
+		const status = result?.status;
 
-    if (!status || status === "OK") {
-      const pos = result?.position ?? "–";
-      const time =
-        result?.time !== undefined ? escapeHtml(formatTime(result.time)) : "–";
-      const behind =
-        result?.timeBehind !== undefined
-          ? escapeHtml(formatTimeBehind(result.timeBehind))
-          : "";
-      finishers.push(
-        `<tr><td>${pos}</td><td>${name}</td><td>${club}</td><td>${time}</td><td>${behind}</td></tr>`,
-      );
-    } else {
-      const cssClass = statusCssClass(status);
-      const label = escapeHtml(statusLabel(status));
-      const time =
-        result?.time !== undefined ? escapeHtml(formatTime(result.time)) : "–";
-      nonFinishers.push(
-        `<tr class="${cssClass}"><td>${label}</td><td>${name}</td><td>${club}</td><td>${time}</td><td>–</td></tr>`,
-      );
-    }
-  }
+		if (!status || status === "OK") {
+			const pos = result?.position ?? "–";
+			const time =
+				result?.time !== undefined ? escapeHtml(formatTime(result.time)) : "–";
+			const behind =
+				result?.timeBehind !== undefined
+					? escapeHtml(formatTimeBehind(result.timeBehind))
+					: "";
+			finishers.push(
+				`<tr><td>${pos}</td><td>${name}</td><td>${club}</td><td>${time}</td><td>${behind}</td></tr>`,
+			);
+		} else {
+			const cssClass = statusCssClass(status);
+			const label = escapeHtml(statusLabel(status));
+			const time =
+				result?.time !== undefined ? escapeHtml(formatTime(result.time)) : "–";
+			nonFinishers.push(
+				`<tr class="${cssClass}"><td>${label}</td><td>${name}</td><td>${club}</td><td>${time}</td><td>–</td></tr>`,
+			);
+		}
+	}
 
-  return [...finishers, ...nonFinishers].join("\n");
+	return [...finishers, ...nonFinishers].join("\n");
 }
 
 function createSplitTimesTable(
-  classResult: ClassResult,
-  sectionId: string,
+	classResult: ClassResult,
+	sectionId: string,
 ): string {
-  const okResults = (classResult.personResult ?? []).filter(
-    (pr) => !pr.result?.[0]?.status || pr.result[0].status === "OK",
-  );
+	const okResults = (classResult.personResult ?? []).filter(
+		(pr) => !pr.result?.[0]?.status || pr.result[0].status === "OK",
+	);
 
-  if (okResults.length === 0) return "";
+	if (okResults.length === 0) return "";
 
-  // Collect control codes in order from the first finisher with split times
-  const firstWithSplits = okResults.find(
-    (pr) => (pr.result?.[0]?.splitTime?.length ?? 0) > 0,
-  );
-  if (!firstWithSplits) return "";
+	// Collect control codes in order from the first finisher with split times
+	const firstWithSplits = okResults.find(
+		(pr) => (pr.result?.[0]?.splitTime?.length ?? 0) > 0,
+	);
+	if (!firstWithSplits) return "";
 
-  const controlCodes =
-    firstWithSplits.result?.[0]?.splitTime?.map((st) => st.controlCode ?? "") ??
-    [];
+	const controlCodes =
+		firstWithSplits.result?.[0]?.splitTime?.map((st) => st.controlCode ?? "") ??
+		[];
 
-  const headerCells = controlCodes
-    .map((code) => `<th>${escapeHtml(code)}</th>`)
-    .join("");
+	const headerCells = controlCodes
+		.map((code) => `<th>${escapeHtml(code)}</th>`)
+		.join("");
 
-  const rows = okResults
-    .map((pr) => {
-      const result = pr.result?.[0];
-      const splitTimes = result?.splitTime ?? [];
-      const name = escapeHtml(getName(pr.person));
-      const pos = result?.position ?? "–";
+	const rows = okResults
+		.map((pr) => {
+			const result = pr.result?.[0];
+			const splitTimes = result?.splitTime ?? [];
+			const name = escapeHtml(getName(pr.person));
+			const pos = result?.position ?? "–";
 
-      // Build a map from control code to cumulative time for quick lookup
-      const timeByCode = new Map(
-        splitTimes.map((st) => [st.controlCode ?? "", st.time]),
-      );
+			// Build a map from control code to cumulative time for quick lookup
+			const timeByCode = new Map(
+				splitTimes.map((st) => [st.controlCode ?? "", st.time]),
+			);
 
-      const cells = controlCodes
-        .map((code, i) => {
-          const cumulative = timeByCode.get(code);
-          if (cumulative === undefined) return "<td>–</td>";
-          // Leg time = cumulative - previous cumulative (or 0 for first leg)
-          const prevCode = i > 0 ? controlCodes[i - 1] : undefined;
-          const prevCumulative = prevCode !== undefined ? (timeByCode.get(prevCode) ?? 0) : 0;
-          const legTime = cumulative - prevCumulative;
-          return `<td>${escapeHtml(formatTime(legTime))}</td>`;
-        })
-        .join("");
+			const cells = controlCodes
+				.map((code, i) => {
+					const cumulative = timeByCode.get(code);
+					if (cumulative === undefined) return "<td>–</td>";
+					// Leg time = cumulative - previous cumulative (or 0 for first leg)
+					const prevCode = i > 0 ? controlCodes[i - 1] : undefined;
+					const prevCumulative =
+						prevCode !== undefined ? (timeByCode.get(prevCode) ?? 0) : 0;
+					const legTime = cumulative - prevCumulative;
+					return `<td>${escapeHtml(formatTime(legTime))}</td>`;
+				})
+				.join("");
 
-      const totalTime =
-        result?.time !== undefined ? escapeHtml(formatTime(result.time)) : "–";
+			const totalTime =
+				result?.time !== undefined ? escapeHtml(formatTime(result.time)) : "–";
 
-      return `<tr><td>${pos}</td><td>${name}</td>${cells}<td>${totalTime}</td></tr>`;
-    })
-    .join("\n");
+			return `<tr><td>${pos}</td><td>${name}</td>${cells}<td>${totalTime}</td></tr>`;
+		})
+		.join("\n");
 
-  const finishHeader = `<th>Totaltid</th>`;
+	const finishHeader = `<th>Totaltid</th>`;
 
-  return `
+	return `
   <section id="${sectionId}">
     <h3>Strekktider ${escapeHtml(getClassName(classResult))}</h3>
     <div style="overflow-x: auto;">
@@ -184,16 +185,13 @@ function createSplitTimesTable(
   </section>`;
 }
 
-function createClassSection(
-  classResult: ClassResult,
-  index: number,
-): string {
-  const className = escapeHtml(getClassName(classResult));
-  const lengthKm = getCourseLengthKm(classResult);
-  const rows = createClassResultRows(classResult);
-  const splitsTable = createSplitTimesTable(classResult, `splits-${index}`);
+function createClassSection(classResult: ClassResult, index: number): string {
+	const className = escapeHtml(getClassName(classResult));
+	const lengthKm = getCourseLengthKm(classResult);
+	const rows = createClassResultRows(classResult);
+	const splitsTable = createSplitTimesTable(classResult, `splits-${index}`);
 
-  return `
+	return `
   <section id="class-${index}">
     <h2>Resultater ${className} (${lengthKm} km)</h2>
     <table>
@@ -209,20 +207,20 @@ function createClassSection(
 }
 
 export const createResultListDocument = (
-  resultList: ResultList,
-  options: ResultListOptions,
+	resultList: ResultList,
+	options: ResultListOptions,
 ): string => {
-  const title = escapeHtml(
-    options.title ?? resultList.event?.name ?? "Rankingløp",
-  );
+	const title = escapeHtml(
+		options.title ?? resultList.event?.name ?? "Rankingløp",
+	);
 
-  const headerHtml = createResultListHeader(options, resultList);
+	const headerHtml = createResultListHeader(options, resultList);
 
-  const sectionsHtml = (resultList.classResult ?? [])
-    .map((cr, i) => createClassSection(cr, i))
-    .join("\n");
+	const sectionsHtml = (resultList.classResult ?? [])
+		.map((cr, i) => createClassSection(cr, i))
+		.join("\n");
 
-  return `<!DOCTYPE html>
+	return `<!DOCTYPE html>
 <html lang="nb">
 <head>
   <meta charset="UTF-8">

@@ -1,40 +1,36 @@
 {
-  "name": "rankinglop-resultlist-generator",
-  "version": "1.0.0",
-  "description": "Generate old school HTML file when given an IOF v3 XML file",
-  "main": "dist/index.js",
-  "module": "dist/index.js",
-  "type": "module",
-  "scripts": {
-    "start": "tsc && node --no-warnings .",
-    "test": "tsc && node --no-warnings . | grep -q 'Oslostudentenes IK'"
-  },
-  "dependencies": {
-    "@picocss/pico": "2.1.1",
-    "fast-xml-parser": "5.5.9",
-    "jsdom": "29.0.1",
-    "typescript": "5.9.3"
-  },
-  "devDependencies": {
-    "@types/jsdom": "28.0.1"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/mikaello/rankinglop-resultlist-generator.git"
-  },
-  "bugs": {
-    "url": "https://github.com/mikaello/rankinglop-resultlist-generator/issues"
-  },
-  "homepage": "",
-  "keywords": [
-    "iof",
-    "orienteering",
-    "rankingløp"
-  ],
-  "author": "mikaello",
-  "license": "GPL-3.0",
-  "prettier": {
-    "trailingComma": "all",
-    "proseWrap": "always"
-  }
+	"name": "rankinglop-resultlist-generator",
+	"version": "1.0.0",
+	"description": "Generate old school HTML file when given an IOF v3 XML file",
+	"type": "module",
+	"scripts": {
+		"start": "node --experimental-strip-types src/index.ts",
+		"typecheck": "tsc --noEmit",
+		"lint": "biome check --write .",
+		"test": "node --experimental-strip-types --test 'test/**/*.test.ts'"
+	},
+	"dependencies": {
+		"@picocss/pico": "2.1.1",
+		"fast-xml-parser": "5.5.9"
+	},
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/mikaello/rankinglop-resultlist-generator.git"
+	},
+	"bugs": {
+		"url": "https://github.com/mikaello/rankinglop-resultlist-generator/issues"
+	},
+	"homepage": "",
+	"keywords": [
+		"iof",
+		"orienteering",
+		"rankingløp"
+	],
+	"author": "mikaello",
+	"license": "GPL-3.0",
+	"devDependencies": {
+		"@biomejs/biome": "2.4.10",
+		"@types/node": "25.5.0",
+		"typescript": "6.0.2"
+	}
 }
