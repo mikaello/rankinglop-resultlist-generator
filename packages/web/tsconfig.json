@@ -1,0 +1,15 @@
+{
+	"compilerOptions": {
+		"target": "ESNext",
+		"module": "ESNext",
+		"moduleResolution": "bundler",
+		"allowImportingTsExtensions": true,
+		"resolveJsonModule": true,
+		"strict": true,
+		"noEmit": true,
+		"paths": {
+			"@core/*": ["../../src/*"]
+		}
+	},
+	"include": ["src/**/*", "../../src/**/*"]
+}
