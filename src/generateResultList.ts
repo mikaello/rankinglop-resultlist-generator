@@ -29,6 +29,7 @@ const CUSTOM_CSS = `
   td, th { padding: 0.3rem 0.5rem; }
   .status-dnf, .status-dns, .status-dsq, .status-ovt, .status-nc { color: var(--pico-muted-color, #888); }
   .splits-table th, .splits-table td { font-size: 0.8em; white-space: nowrap; }
+  .best-split { color: #c00; font-weight: bold; }
 `;
 
 function statusLabel(status: ResultStatus | undefined): string {
@@ -131,32 +132,50 @@ function createSplitTimesTable(
 		firstWithSplits.result?.[0]?.splitTime?.map((st) => st.controlCode ?? "") ??
 		[];
 
+	// Compute leg times for every finisher (undefined = missing split)
+	const allLegTimes: (number | undefined)[][] = okResults.map((pr) => {
+		const result = pr.result?.[0];
+		const splitTimes = result?.splitTime ?? [];
+		const timeByCode = new Map(
+			splitTimes.map((st) => [st.controlCode ?? "", st.time]),
+		);
+		return controlCodes.map((code, i) => {
+			const cumulative = timeByCode.get(code);
+			if (cumulative === undefined) return undefined;
+			const prevCode = i > 0 ? controlCodes[i - 1] : undefined;
+			const prevCumulative =
+				prevCode !== undefined ? (timeByCode.get(prevCode) ?? 0) : 0;
+			return cumulative - prevCumulative;
+		});
+	});
+
+	// Find the best (minimum) leg time per column
+	const bestLegTime: number[] = controlCodes.map((_, colIdx) => {
+		let best = Number.POSITIVE_INFINITY;
+		for (const row of allLegTimes) {
+			const t = row[colIdx];
+			if (t !== undefined && t < best) best = t;
+		}
+		return best;
+	});
+
 	const headerCells = controlCodes
 		.map((code) => `<th>${escapeHtml(code)}</th>`)
 		.join("");
 
 	const rows = okResults
-		.map((pr) => {
+		.map((pr, personIdx) => {
 			const result = pr.result?.[0];
-			const splitTimes = result?.splitTime ?? [];
 			const name = escapeHtml(getName(pr.person));
 			const pos = result?.position ?? "–";
 
-			// Build a map from control code to cumulative time for quick lookup
-			const timeByCode = new Map(
-				splitTimes.map((st) => [st.controlCode ?? "", st.time]),
-			);
-
 			const cells = controlCodes
-				.map((code, i) => {
-					const cumulative = timeByCode.get(code);
-					if (cumulative === undefined) return "<td>–</td>";
-					// Leg time = cumulative - previous cumulative (or 0 for first leg)
-					const prevCode = i > 0 ? controlCodes[i - 1] : undefined;
-					const prevCumulative =
-						prevCode !== undefined ? (timeByCode.get(prevCode) ?? 0) : 0;
-					const legTime = cumulative - prevCumulative;
-					return `<td>${escapeHtml(formatTime(legTime))}</td>`;
+				.map((_, i) => {
+					const legTime = allLegTimes[personIdx][i];
+					if (legTime === undefined) return "<td>–</td>";
+					const isBest = legTime === bestLegTime[i];
+					const attr = isBest ? ' class="best-split"' : "";
+					return `<td${attr}>${escapeHtml(formatTime(legTime))}</td>`;
 				})
 				.join("");
 
