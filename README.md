@@ -3,12 +3,12 @@
 A command-line tool that converts an IOF 3.0 XML result list (as exported by
 [Otime](https://otime.no)) into a self-contained HTML page with modern,
 responsive styling. Built for the
-[GeoForm Rankingløp](https://www.geoform.no) series.
+[GeoForm Rankingløp](https://www.ilgeoform.no) series.
 
 ## Requirements
 
-Node.js 22 or later (uses `--experimental-strip-types` to run TypeScript
-directly — no compilation step needed).
+Node.js 22.18.0 or later (runs TypeScript files natively — no compilation step
+needed).
 
 ## Installation
 
@@ -19,7 +19,7 @@ npm install
 ## Usage
 
 ```bash
-node --experimental-strip-types src/index.ts \
+node src/index.ts \
   --input result.xml \
   [--config event.json] \
   [--output result.html]
@@ -28,7 +28,7 @@ node --experimental-strip-types src/index.ts \
 If `--output` is omitted the HTML is written to stdout, so you can pipe it:
 
 ```bash
-node --experimental-strip-types src/index.ts --input result.xml > result.html
+node src/index.ts --input result.xml > result.html
 ```
 
 ### Options

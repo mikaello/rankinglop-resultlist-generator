@@ -9,7 +9,7 @@ export type { ResultListOptions, YearDistribution } from "./options.ts";
 
 function printUsage(): void {
 	console.error(
-		`Usage: node --experimental-strip-types src/index.ts --input <file.xml> [--config <options.json>] [--output <file.html>]
+		`Usage: node src/index.ts --input <file.xml> [--config <options.json>] [--output <file.html>]
 
 Options:
   --input  <file.xml>       IOF 3.0 XML result list (required)

@@ -4,10 +4,10 @@
 	"description": "Generate old school HTML file when given an IOF v3 XML file",
 	"type": "module",
 	"scripts": {
-		"start": "node --experimental-strip-types src/index.ts",
+		"start": "node src/index.ts",
 		"typecheck": "tsc --noEmit",
 		"lint": "biome check --write .",
-		"test": "node --experimental-strip-types --test 'test/**/*.test.ts'"
+		"test": "node --test 'test/**/*.test.ts'"
 	},
 	"dependencies": {
 		"@picocss/pico": "2.1.1",
