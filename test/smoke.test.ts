@@ -15,7 +15,7 @@ function runCli(args: string[]): {
 } {
 	const result = spawnSync(
 		process.execPath,
-		["--experimental-strip-types", join(rootDir, "src", "index.ts"), ...args],
+		[join(rootDir, "src", "cli.ts"), ...args],
 		{ encoding: "utf8" },
 	);
 	return {
@@ -63,7 +63,10 @@ describe("CLI smoke tests", () => {
 
 	it("HTML contains status label for MissingPunch results", () => {
 		const { stdout } = runCli(["--input", exampleXml]);
-		assert.ok(stdout.includes("feilst"), "should contain MissingPunch status marker");
+		assert.ok(
+			stdout.includes("feilst"),
+			"should contain MissingPunch status marker",
+		);
 	});
 
 	it("HTML contains split times section", () => {
