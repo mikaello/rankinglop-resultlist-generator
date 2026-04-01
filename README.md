@@ -1,0 +1,2 @@
+# rankinglop-resultlist-generator
+
