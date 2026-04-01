@@ -1,25 +1,40 @@
 # rankinglop-resultlist-generator
 
-A command-line tool that converts an IOF 3.0 XML result list (as exported by
-[Otime](https://otime.no)) into a self-contained HTML page with modern,
-responsive styling. Built for the
-[GeoForm Rankingløp](https://www.ilgeoform.no) series.
+A command-line tool **and library** that converts an IOF 3.0 XML result list
+(as exported by [Otime](https://otime.no)) into a self-contained HTML page
+with modern, responsive styling.
+Built for the [GeoForm Rankingløp](https://www.ilgeoform.no) series.
 
 ## Requirements
 
 Node.js 22.18.0 or later (runs TypeScript files natively — no compilation step
-needed).
+needed for local development).
 
 ## Installation
+
+### As a global CLI
+
+```bash
+npm install -g rankinglop-resultlist-generator
+rankinglop --input result.xml --output result.html
+```
+
+### In a project
+
+```bash
+npm install rankinglop-resultlist-generator
+```
+
+### For local development
 
 ```bash
 npm install
 ```
 
-## Usage
+## CLI usage
 
 ```bash
-node src/index.ts \
+node src/cli.ts \
   --input result.xml \
   [--config event.json] \
   [--output result.html]
@@ -28,7 +43,13 @@ node src/index.ts \
 If `--output` is omitted the HTML is written to stdout, so you can pipe it:
 
 ```bash
-node src/index.ts --input result.xml > result.html
+node src/cli.ts --input result.xml > result.html
+```
+
+When installed globally via npm:
+
+```bash
+rankinglop --input result.xml --output result.html
 ```
 
 ### Options
@@ -62,11 +83,54 @@ node src/index.ts --input result.xml > result.html
 All fields are optional and fall back to sensible defaults or values from the
 XML itself.
 
+## Programmatic API
+
+The package exposes a browser- and Node.js-compatible API:
+
+```ts
+import {
+  parseIofXmlContent,
+  createResultListHtml,
+  type ResultList,
+  type ResultListOptions,
+} from "rankinglop-resultlist-generator";
+
+// 1. Parse an IOF 3.0 XML string into a typed model
+const resultList: ResultList = parseIofXmlContent(xmlString);
+
+// 2. Generate the HTML, providing the Pico CSS string yourself
+//    (load it however is right for your environment)
+const html: string = createResultListHtml(resultList, options, picoCSS);
+```
+
+`parseIofXmlContent(xmlString: string): ResultList`
+: Parse an IOF 3.0 XML result list from a string.
+  No file-system access — works in Node.js and browsers.
+
+`createResultListHtml(resultList, options, picoCSS): string`
+: Generate a complete self-contained HTML document.
+  `picoCSS` is the content of `@picocss/pico/css/pico.classless.min.css` as a
+  string.
+  In Node.js you can `readFileSync` it; in a Vite project use a `?inline` import.
+
+### Node.js convenience wrapper
+
+If you don't want to manage the CSS yourself, the Node.js-only
+`createResultListDocument` reads Pico CSS from the installed package
+automatically:
+
+```ts
+import { createResultListDocument } from "rankinglop-resultlist-generator/node";
+// or via the full path:
+import { createResultListDocument } from "rankinglop-resultlist-generator/src/generateResultList.ts";
+```
+
 ## npm scripts
 
 | Script | Description |
 |--------|-------------|
 | `npm start` | Run the CLI (add arguments after `--`) |
+| `npm run build` | Compile TypeScript to `dist/` with tsup |
 | `npm run typecheck` | Type-check with `tsc --noEmit` |
 | `npm run lint` | Lint and format with Biome |
 | `npm test` | Run all tests with `node:test` |
@@ -78,16 +142,20 @@ The generated HTML is a single self-contained file with no external requests:
 - **Pico CSS** (classless flavour) is embedded inline in `<style>`.
 - A `<nav>` at the top links to each class section and its split-time table.
 - Each orienteering class gets a `<section>` with a results `<table>`.
-- Non-finishers (DNS, DNF, DSQ, OVT, NC) are shown at the bottom of each
-  table in a muted style.
-- A second table per class shows individual leg times derived from the
-  `<SplitTime>` elements in the XML.
+- Columns: Plass · Navn · Klubb · Tid · Diff · km-tid.
+- Non-finishers (DNS, DNF, DSQ, OVT, feilst, NC) are shown at the bottom of
+  each table in a muted style.
+- A second table per class shows leg split times and accumulated times.
+- Best split per control highlighted red, second-best highlighted blue.
 
 ## Development
 
 ```bash
 # Type-check
 npm run typecheck
+
+# Build dist/
+npm run build
 
 # Lint / format
 npm run lint
@@ -99,3 +167,4 @@ npm test
 ## License
 
 GPL-3.0 — see [LICENSE](LICENSE).
+
