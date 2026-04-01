@@ -1,6 +1,429 @@
 # Upgrade gameplan
 
+## ✅ Completed work
+
+### Phase 1 — Core plumbing
+- **1.1** Added `fast-xml-parser` dependency (exact version pinned).
+- **1.2** Created `src/parseIofXml.ts` — IOF 3.0 XML → typed `ResultList`.
+  Handles UTF-8 and ISO-8859-1 encoding transparently (tries UTF-8 strict first, falls back to latin1).
+- **1.3** Rewrote `src/index.ts` as a proper CLI with `--input`, `--output`, `--config` flags.
+  Prints usage and exits non-zero on bad input.
+- **1.4** Slimmed `model.ts` from ~1000 auto-generated lines to ~80 relevant interfaces.
+
+### Phase 2 — Modern HTML output
+- **2.1** Dropped `jsdom`; all HTML generated with template literals + `escapeHtml()` helper.
+- **2.2** Pico CSS (classless, minified) embedded inline — single self-contained output file.
+- **2.3** Each class gets a `<section>` with an `<h2>` heading and a `<table>`.
+  Columns: Plass · Navn · Klubb · Tid · Diff · km-tid (time per km).
+- **2.4** Responsive `<header>` / `<dl>` event metadata block.
+- **2.5** `<nav>` at the top with links to every class section.
+
+### Phase 3 — Completeness and correctness
+- **3.1** All IOF result statuses handled: DNS, DNF, DSQ, OVT, feilst (MissingPunch), NC.
+- **3.2** Ranking points (`Poeng`) column omitted — not in IOF XML. TODO comment left in code.
+- **3.3** Split times tables implemented per class:
+  - Two rows per person: leg times (row 1) + accumulated times (row 2, muted italic).
+  - Column headers show leg ranges: `S-1 (code)`, `1-2 (code)`, …, `14-M`.
+  - Finish leg computed as `total_time − last_intermediate_cumul` (IOF XML omits it).
+  - Best leg/cumul highlighted red (`.best-split`), second-best blue (`.second-split`).
+  - Non-OK runners with any recorded splits shown at the bottom of the splits table.
+  - Totaltid cell shows diff on a second line for non-winners.
+- **3.4** TypeScript issues fixed; `tsconfig.json` modernised (`ESNext`, `bundler`, `strict: true`).
+  All XML-derived values wrapped in `escapeHtml()`.
+- **3.5** `package.json` scripts updated; Biome added as devDep; jsdom removed.
+  GitHub Actions CI added (push + PR, Node 24, runs typecheck/lint/test).
+- **3.6** 20 tests: `test/parseIofXml.test.ts` (parser unit tests) and `test/smoke.test.ts`
+  (end-to-end CLI smoke tests). All passing.
+
+### Fixes post-Phase 3
+- `--experimental-strip-types` flag dropped (Node ≥ 22.18 runs TS natively).
+- Norwegian characters in example XML corrected (U+FFFD → ø/æ/å/Ø/Æ/Å).
+- `MissingPunch` label corrected to `feilst`.
+- Test glob fixed from quoted `'test/**/*.test.ts'` to `test/*.test.ts` (shell-expanded,
+  compatible with GitHub Actions `sh`/`dash`).
+
+---
+
 ## Current state (problems to fix)
+
+- **No XML parsing.** The main entry point imports a hard-coded JSON file
+  (`res2021-09-18.json`) instead of reading an IOF XML file. The example XML in
+  `examples/` is never actually parsed.
+- **No CLI interface.** There are no command-line arguments; the file to process
+  and the event metadata are baked directly into `index.ts`.
+- **Heavyweight DOM dependency for HTML generation.** `jsdom` is used solely to
+  build HTML strings. Template literals are simpler, lighter, and produce the
+  same result.
+- **Output is monospaced `<pre>` blocks.** The generated HTML uses fixed-width
+  text tables that are unreadable on mobile and look dated.
+- **Oversized model file.** `model.ts` is an auto-generated Eventor API model
+  (~1000+ lines). Only a small subset of it is used; the rest is noise.
+- **Incomplete result handling.** DNS, DNF, DSQ, OVT, and other statuses are
+  not displayed.
+- **Split times not implemented.** Two TODO comments mark this as missing.
+- **TypeScript issues.** There is a `@ts-ignore` for `toLocaleDateString`, and
+  the duplicate function block in `generateResultListHeader.ts` should be cleaned
+  up.
+- **Scores/points column.** The old HTML shows a "Poeng" (ranking points) column
+  but the current code does not compute or display it.
+
+---
+
+## Tech decisions
+
+### Runtime: Node.js latest (no extra runtime needed)
+Stay on **Node.js** (v22 LTS or later). It runs TypeScript files directly
+by stripping type annotations at load time — no compilation step, no `dist/` folder, no flags needed.
+
+This works perfectly for everything in this codebase: interfaces, type annotations,
+generics. The only TypeScript features not supported are things this project does
+not use (const enums, decorator metadata, namespaces).
+
+`typescript` becomes a devDependency used only for type-checking (`node --no-warnings
+src/index.ts` to run; `tsc --noEmit` to type-check).
+
+Scripts simplify to:
+```json
+"scripts": {
+  "typecheck": "tsc --noEmit",
+  "start": "node src/index.ts",
+  "test": "node --test test/*.test.ts"
+}
+```
+
+### XML parser: `fast-xml-parser`
+Keep this choice. Actively maintained, zero runtime dependencies, good
+TypeScript support, and handles both UTF-8 and ISO-8859-1 (Otime export
+encoding).
+
+### HTML generation: template literals + `escapeHtml()`
+Template literals are the right call over jsdom. **Important:** athlete names,
+club names, and event names come from untrusted XML input and must be
+HTML-escaped before interpolation to prevent XSS. Add a small `escapeHtml()`
+helper (escapes `&`, `<`, `>`, `"`, `'`) and apply it to every value
+interpolated from the parsed XML.
+
+### CSS: Pico CSS classless
+Keep this choice. ~10 kB, no class names needed, styles semantic HTML
+(`<table>`, `<header>`, `<nav>`, `<section>`) automatically — ideal for a
+single self-contained output file.
+
+### TypeScript config: modernise
+Update `tsconfig.json`:
+- `"target": "ESNext"` — no legacy runtime to support
+- `"moduleResolution": "bundler"` — replaces the deprecated `"node"` value
+- `"strict": true` — catches real bugs; not currently enabled
+- Remove all emit settings (`outDir`, `rootDir`, etc.) — Bun handles execution,
+  tsconfig is type-checking only
+- Keep `"resolveJsonModule": true`
+
+### Testing: `node:test`
+Use Node.js's built-in `node:test` runner. No test framework package needed.
+Write `.test.ts` files and run them directly via `--experimental-strip-types`.
+Structured `describe`/`it`/`assert` output, no extra dependencies.
+
+### Linting and formatting: Biome
+Add **Biome** as a devDependency. It replaces ESLint + Prettier in a single
+binary with near-instant execution.
+
+```
+npm install --save-dev --save-exact @biomejs/biome
+npx biome init
+```
+
+Enforce via a `lint` script and in CI. Biome's defaults are sensible; add
+`biome.json` to the repo to pin the config.
+
+---
+
+## Working conventions
+
+- **Run `npm test` and `npm run lint` after every meaningful change.** Don't
+  let failures accumulate.
+- **Commit after each phase and after each numbered subphase** where it makes
+  sense as a standalone change.
+- Update this game plan document as you progress.
+- **Conventional commits, no emojis, brief subject lines.** Format:
+  `type(scope): short description` — e.g. `feat(parser): add IOF XML parser`,
+  `chore: remove jsdom dependency`, `fix(html): escape XML-derived values`.
+  Types: `feat`, `fix`, `chore`, `refactor`, `test`, `docs`.
+- If installing dependencies with npm, always use `--save-exact` option.
+- If adding documentation as markdown, adhere to the principle of one sentence per line.
+- **README must be kept up to date.** After Phase 1 is done, update `README.md`
+  with a one-paragraph intro and minimal usage instructions (see implementation
+  order step 10).
+
+---
+
+## Phase 1 — Core plumbing (make the tool actually work)
+
+### 1.1 Add an XML parser
+Add `fast-xml-parser` as a dependency. It is lightweight, has no runtime
+dependencies, and handles the ISO-8859-1 encoding used by Otime exports.
+
+```
+npm install --save-exact fast-xml-parser
+```
+
+### 1.2 Write an IOF 3.0 XML → model parser
+Create `src/parseIofXml.ts` that:
+- Reads the XML file using `fs.readFileSync` (sync is fine for a CLI)
+- Calls `fast-xml-parser` to get a plain JS object
+- Maps the result to the trimmed `ResultList` model (see 1.4)
+- Handles both UTF-8 and ISO-8859-1 encoding transparently
+
+### 1.3 Create a proper CLI entry point
+Rewrite the bottom of `index.ts` (currently a hard-coded invocation) to:
+- Accept `--input <file.xml>` or read from stdin
+- Accept `--output <file.html>` (default: stdout, so it can be piped)
+- Accept `--config <options.json>` for event metadata that is not in the XML
+  (organiser, venue, rental devices, year distribution, start fee amounts, etc.)
+- Print usage and exit with a non-zero code on bad input
+
+Example:
+```
+node src/index.ts --input result.xml --config event.json --output result.html
+node src/index.ts --input result.xml > result.html
+```
+
+### 1.4 Slim down `model.ts`
+Keep only the interfaces actually needed for a result list:
+`ResultList`, `ClassResult`, `PersonResult`, `Result`, `SplitTime`,
+`Person`, `Organisation`, `Event`, `Course`, `Id`, `Name`, `SplitTime`.
+Delete the rest of the auto-generated Eventor API types.
+
+---
+
+## Phase 2 — Modern HTML output
+
+### 2.1 Drop `jsdom`, use template literals
+Replace all JSDOM-based HTML construction in `generateResultList.ts` and
+`generateResultListHeader.ts` with plain TypeScript template-literal functions
+that return `string`. This removes the `jsdom` / `@types/jsdom` dependency
+entirely.
+
+### 2.2 Integrate Pico CSS
+Embed Pico CSS (classless flavour, minified, ~10 kB) inline in the `<style>`
+tag so the output is a single fully self-contained HTML file with no external
+requests. Classless Pico styles semantic HTML elements (`<table>`, `<header>`,
+`<section>`, `<h1>`–`<h3>`) automatically.
+
+Reference: https://picocss.com/docs/classless
+
+### 2.3 Replace `<pre>` columns with an HTML table per class
+Each orienteering class gets a `<section>` with:
+- An `<h3>` heading: class name + course length
+- A `<table>` with columns: **Place**, **Name**, **Club**, **Time**, **+Behind**
+- Status rows (DNS, DNF, DSQ, OVT, …) shown at the bottom of each table in a
+  distinct style (e.g. `<td>` with muted colour, no place number)
+
+### 2.4 Responsive event header
+Replace the `<pre>` header block with a `<header>` / `<dl>` (description list)
+structure:
+```
+Date/place | Map | Organiser | Entries | …
+```
+This collapses naturally on narrow screens.
+
+### 2.5 Navigation / table of contents
+Replace the inline `<a name="Res1">` anchor approach with a `<nav>` element at
+the top containing links to each class section using standard `id` attributes.
+
+---
+
+## Phase 3 — Completeness and correctness
+
+### 3.1 Handle all result statuses
+Map IOF `<Status>` values to display text:
+| IOF status | Display |
+|------------|---------|
+| OK         | place number |
+| DNS        | DNS |
+| DNF        | DNF |
+| DSQ        | DSQ |
+| OVT / MisPunch | OVT |
+| NotCompeting | NC |
+
+### 3.2 Ranking points column
+The old output has a "Poeng" column. Ranking points are not in the IOF XML
+(they are computed externally), so this column is omitted unless a future
+config option supplies them per-person. Leave a note in the code as a TODO.
+
+### 3.3 Split times section
+Implement the split times tables that are currently TODO. Each class gets a
+second table below the results table showing leg times for all finishers.
+Use the `<SplitTime>` elements already present in the example XML.
+
+### 3.4 Fix remaining TypeScript issues
+- Remove the `@ts-ignore` by typing `dateOptions` as `Intl.DateTimeFormatOptions`.
+- Update `tsconfig.json` per the Tech decisions section above:
+  `target: ESNext`, `moduleResolution: bundler`, `strict: true`, remove emit settings.
+- Ensure every XML-derived value passed into template literals is wrapped in `escapeHtml()`.
+
+### 3.5 Update/simplify `package.json` scripts
+```json
+"scripts": {
+  "start": "node src/index.ts",
+  "typecheck": "tsc --noEmit",
+  "lint": "biome check --write .",
+  "test": "node --test test/*.test.ts"
+}
+```
+Also:
+- Move `typescript` from `dependencies` to `devDependencies`
+- Add `@biomejs/biome` to `devDependencies`
+- Remove `jsdom` and `@types/jsdom` entirely
+- Remove `main`/`module` fields pointing at `dist/` — there is no build output
+
+Add a `.github/workflows/ci.yml` that runs on push and pull_request:
+```yaml
+- run: npm ci
+- run: npm run typecheck
+- run: npm run lint
+- run: npm test
+```
+
+---
+
+## Phase 3.6 — Tests and verification (lightweight)
+
+Use Node.js's built-in `node:test` runner — no test framework package needed.
+Write `.test.ts` files; Node runs them directly.
+
+**`test/parseIofXml.test.ts`** — unit tests for the parser in isolation:
+- Parses `examples/example_iof_resultlist.xml` and checks the returned model
+- Asserts class count, first result name and time, course lengths
+- Fast feedback without touching HTML generation
+
+**`test/smoke.test.ts`** — end-to-end smoke test:
+- Spawns `node src/index.ts --input examples/example_iof_resultlist.xml`
+  via `child_process.spawn` and captures stdout
+- Asserts the HTML output contains expected strings: `<!DOCTYPE html>`,
+  event name in `<title>`, each class heading, the winner's name and time,
+  and DNS/DNF/DSQ markers where present in the data
+
+Both files use `describe` / `it` / `assert` from `node:test` and `node:assert`. Run with:
+```
+npm test
+```
+
+---
+
+## Phase 4 — Publish to npm
+
+Publishing gives the CLI a permanent public home, makes it installable globally
+in one command (`npx rankinglop-resultlist-generator`), and is a prerequisite
+for having the SPA (Phase 5) import the core generation logic as a package.
+
+### 4.1 Prepare package for publishing
+- Add a `build` script that compiles TypeScript to a `dist/` folder:
+  `"build": "tsc --outDir dist --noEmit false"`.
+- Set `"main": "dist/index.js"` and `"bin": { "rankinglop": "dist/index.js" }` in `package.json`.
+- Add a `"files"` array to `package.json` so only `dist/` and the licence ship: `["dist", "LICENSE"]`.
+- Add a shebang line `#!/usr/bin/env node` at the top of `src/index.ts`.
+- Separate the HTML generation API from the CLI so consumers can
+  `import { createResultListDocument } from "rankinglop-resultlist-generator"`.
+- Choose a suitable package name and check availability on npmjs.com.
+- Add a `"exports"` map in `package.json` pointing at the compiled entry point.
+
+### 4.2 Document the public API
+- Update `README.md` with a "Programmatic API" section showing import + usage.
+- Document `createResultListDocument(resultList, options)` return type and parameters.
+
+### 4.3 Set up automated publishing via GitHub Actions
+- Add a `release.yml` workflow triggered on `push` to a `v*` tag.
+- workflow steps: `npm ci`, `npm run build`, `npm publish --access public`.
+- Store `NPM_TOKEN` as a GitHub Actions secret.
+- Use `npm version patch/minor/major` locally to cut releases.
+
+---
+
+## Phase 5 — Browser SPA (client-side, no server required)
+
+A pure client-side web app removes all friction: no install, no terminal, no server.
+A user visits the page, picks their IOF XML file, and gets the result HTML to download.
+It can be hosted for free on GitHub Pages.
+
+### 5.1 Set up a separate SPA package
+- Create a `packages/web/` subdirectory (or a separate repo) with a Vite project.
+- Use plain TypeScript + Vite (no framework needed for this level of interactivity).
+- Import the core generation logic from the main package (Phase 4 must be done first)
+  or inline the `src/` files if keeping a monorepo.
+
+### 5.2 Build the upload UI
+- `<input type="file" accept=".xml">` for selecting the IOF XML file.
+- Read the file in the browser using the `FileReader` API (no server round-trip).
+- Validate the uploaded file:
+  - Is it XML? (check `<?xml` preamble and `<ResultList` root element)
+  - Does it declare `iofVersion="3.0"` on the root?
+  - Does it contain at least one `<ClassResult>`?
+  - Show a clear error message if validation fails.
+- Optional: `<input type="file" accept=".json">` for the config file (`--config` equivalent).
+
+### 5.3 Wire up generation and download
+- After validation, parse the XML in-browser using `fast-xml-parser` (it is browser-compatible).
+- Call `createResultListDocument(resultList, options)` from the core package.
+- Offer the result as a download:
+  ```ts
+  const blob = new Blob([html], { type: "text/html" });
+  const url = URL.createObjectURL(blob);
+  // <a download="resultlist.html" href={url}>
+  ```
+- Show a live preview in an `<iframe srcdoc={html}>` below the download button.
+
+### 5.4 Deploy to GitHub Pages
+- Add a `web.yml` CI workflow: build the Vite app on push to `main`, deploy to `gh-pages` branch.
+- Use `actions/upload-pages-artifact` + `actions/deploy-pages`.
+- Set `base` in `vite.config.ts` to the repository path (e.g. `/rankinglop-resultlist-generator/`).
+
+---
+
+## Phase 6 — Serverless function
+
+A serverless endpoint allows integration with other tools (e.g. posting an XML
+file from a script or a mobile app and getting HTML back as a response).
+It can also back the SPA if a server-side rendering option is ever needed.
+
+### 6.1 Choose a platform
+Cloudflare Workers is recommended: free tier is generous, global edge deployment,
+no cold-start issues, Workers support Node.js-compatible APIs.
+Alternative: AWS Lambda with a function URL (simpler IAM, pay-per-request).
+
+### 6.2 Implement the handler
+- Accept a `multipart/form-data` POST with a field `xml` (the IOF XML file) and
+  an optional field `config` (JSON options).
+- Parse and validate the XML (same validation as Phase 5.2).
+- Call `createResultListDocument` from the core package.
+- Return the HTML as `Content-Type: text/html; charset=utf-8`.
+- Return meaningful HTTP error codes: 400 for invalid input, 413 for oversized files.
+
+### 6.3 Add a rate limit and file size guard
+- Reject requests where the XML body exceeds 2 MB.
+- Cloudflare Workers: use a KV-based counter or rely on the free-tier request limits.
+
+### 6.4 Wire up the SPA to the serverless function (optional)
+- The SPA (Phase 5) could POST to the Workers endpoint instead of running
+  generation client-side, enabling server-side logic (e.g. caching) in the future.
+- Keep client-side generation as the default; the serverless endpoint is a fallback.
+
+---
+
+## Suggested implementation order
+
+1. Phase 1.4 — slim down `model.ts` (quick win, unblocks type safety) ✅
+2. Phase 1.2 — XML parser (`src/parseIofXml.ts`) ✅
+3. Phase 1.3 — CLI entry point ✅
+4. Phase 2.1 — drop `jsdom` ✅
+5. Phase 2.2–2.5 — new HTML layout with Pico CSS ✅
+6. Phase 3.1–3.2 — status handling + points note ✅
+7. Phase 3.3 — split times ✅
+8. Phase 3.4–3.5 — TS fixes, Biome, updated scripts, GitHub Actions CI ✅
+9. Phase 3.6 — smoke tests and parser unit tests ✅
+10. Update `README.md` — brief intro + usage instructions ✅
+11. Phase 4 — publish to npm
+12. Phase 5 — browser SPA on GitHub Pages
+13. Phase 6 — Cloudflare Workers serverless endpoint
+
 
 - **No XML parsing.** The main entry point imports a hard-coded JSON file
   (`res2021-09-18.json`) instead of reading an IOF XML file. The example XML in
