@@ -4,6 +4,7 @@ import { escapeHtml } from "./escapeHtml.ts";
 import { createResultListHeader } from "./generateResultListHeader.ts";
 import type { ClassResult, ResultList, ResultStatus } from "./model.ts";
 import {
+	formatKmTime,
 	formatTime,
 	formatTimeBehind,
 	getClassName,
@@ -30,6 +31,9 @@ const CUSTOM_CSS = `
   .status-dnf, .status-dns, .status-dsq, .status-ovt, .status-nc { color: var(--pico-muted-color, #888); }
   .splits-table th, .splits-table td { font-size: 0.8em; white-space: nowrap; }
   .best-split { color: #c00; font-weight: bold; }
+  .second-split { color: #00c; font-weight: bold; }
+  .splits-cumul-row td { color: var(--pico-muted-color, #666); font-style: italic; font-size: 0.85em; }
+  .splits-table tbody + tbody { border-top: 1px solid var(--pico-table-border-color, #ccc); }
 `;
 
 function statusLabel(status: ResultStatus | undefined): string {
@@ -78,6 +82,7 @@ function statusCssClass(status: ResultStatus | undefined): string {
 }
 
 function createClassResultRows(classResult: ClassResult): string {
+	const lengthKm = getCourseLengthKm(classResult);
 	const finishers: string[] = [];
 	const nonFinishers: string[] = [];
 
@@ -95,8 +100,12 @@ function createClassResultRows(classResult: ClassResult): string {
 				result?.timeBehind !== undefined
 					? escapeHtml(formatTimeBehind(result.timeBehind))
 					: "";
+			const kmTid =
+				result?.time !== undefined
+					? escapeHtml(formatKmTime(result.time, lengthKm))
+					: "–";
 			finishers.push(
-				`<tr><td>${pos}</td><td>${name}</td><td>${club}</td><td>${time}</td><td>${behind}</td></tr>`,
+				`<tr><td>${pos}</td><td>${name}</td><td>${club}</td><td>${time}</td><td>${behind}</td><td>${kmTid}</td></tr>`,
 			);
 		} else {
 			const cssClass = statusCssClass(status);
@@ -104,7 +113,7 @@ function createClassResultRows(classResult: ClassResult): string {
 			const time =
 				result?.time !== undefined ? escapeHtml(formatTime(result.time)) : "–";
 			nonFinishers.push(
-				`<tr class="${cssClass}"><td>${label}</td><td>${name}</td><td>${club}</td><td>${time}</td><td>–</td></tr>`,
+				`<tr class="${cssClass}"><td>${label}</td><td>${name}</td><td>${club}</td><td>${time}</td><td>–</td><td>–</td></tr>`,
 			);
 		}
 	}
@@ -132,14 +141,15 @@ function createSplitTimesTable(
 		firstWithSplits.result?.[0]?.splitTime?.map((st) => st.controlCode ?? "") ??
 		[];
 
-	// Compute leg times for every finisher (undefined = missing split)
-	const allLegTimes: (number | undefined)[][] = okResults.map((pr) => {
+	// Compute leg times and cumulative times for every finisher
+	const allPersonData = okResults.map((pr) => {
 		const result = pr.result?.[0];
 		const splitTimes = result?.splitTime ?? [];
 		const timeByCode = new Map(
 			splitTimes.map((st) => [st.controlCode ?? "", st.time]),
 		);
-		return controlCodes.map((code, i) => {
+		const cumulTimes = controlCodes.map((code) => timeByCode.get(code));
+		const legTimes = controlCodes.map((code, i) => {
 			const cumulative = timeByCode.get(code);
 			if (cumulative === undefined) return undefined;
 			const prevCode = i > 0 ? controlCodes[i - 1] : undefined;
@@ -147,46 +157,70 @@ function createSplitTimesTable(
 				prevCode !== undefined ? (timeByCode.get(prevCode) ?? 0) : 0;
 			return cumulative - prevCumulative;
 		});
+		return { pr, result, legTimes, cumulTimes };
 	});
 
-	// Find the best (minimum) leg time per column
+	// Find best and second-best leg time per column
 	const bestLegTime: number[] = controlCodes.map((_, colIdx) => {
 		let best = Number.POSITIVE_INFINITY;
-		for (const row of allLegTimes) {
-			const t = row[colIdx];
+		for (const { legTimes } of allPersonData) {
+			const t = legTimes[colIdx];
 			if (t !== undefined && t < best) best = t;
 		}
 		return best;
+	});
+
+	const secondBestLegTime: number[] = controlCodes.map((_, colIdx) => {
+		let second = Number.POSITIVE_INFINITY;
+		const best = bestLegTime[colIdx];
+		for (const { legTimes } of allPersonData) {
+			const t = legTimes[colIdx];
+			if (t !== undefined && t > best && t < second) second = t;
+		}
+		return second;
 	});
 
 	const headerCells = controlCodes
 		.map((code) => `<th>${escapeHtml(code)}</th>`)
 		.join("");
 
-	const rows = okResults
-		.map((pr, personIdx) => {
-			const result = pr.result?.[0];
+	const tbodies = allPersonData
+		.map(({ pr, result, legTimes, cumulTimes }) => {
 			const name = escapeHtml(getName(pr.person));
 			const pos = result?.position ?? "–";
+			const totalTime =
+				result?.time !== undefined ? escapeHtml(formatTime(result.time)) : "–";
 
-			const cells = controlCodes
+			const legCells = controlCodes
 				.map((_, i) => {
-					const legTime = allLegTimes[personIdx][i];
+					const legTime = legTimes[i];
 					if (legTime === undefined) return "<td>–</td>";
 					const isBest = legTime === bestLegTime[i];
-					const attr = isBest ? ' class="best-split"' : "";
+					const isSecond = !isBest && legTime === secondBestLegTime[i];
+					const attr = isBest
+						? ' class="best-split"'
+						: isSecond
+							? ' class="second-split"'
+							: "";
 					return `<td${attr}>${escapeHtml(formatTime(legTime))}</td>`;
 				})
 				.join("");
 
-			const totalTime =
-				result?.time !== undefined ? escapeHtml(formatTime(result.time)) : "–";
+			const cumulCells = controlCodes
+				.map((_, i) => {
+					const t = cumulTimes[i];
+					return t !== undefined
+						? `<td>${escapeHtml(formatTime(t))}</td>`
+						: "<td>–</td>";
+				})
+				.join("");
 
-			return `<tr><td>${pos}</td><td>${name}</td>${cells}<td>${totalTime}</td></tr>`;
+			return `<tbody>
+            <tr><td rowspan="2">${pos}</td><td rowspan="2">${name}</td>${legCells}<td rowspan="2">${totalTime}</td></tr>
+            <tr class="splits-cumul-row">${cumulCells}</tr>
+          </tbody>`;
 		})
 		.join("\n");
-
-	const finishHeader = `<th>Totaltid</th>`;
 
 	return `
   <section id="${sectionId}">
@@ -194,11 +228,10 @@ function createSplitTimesTable(
     <div style="overflow-x: auto;">
       <table class="splits-table">
         <thead>
-          <tr><th>Plass</th><th>Navn</th>${headerCells}${finishHeader}</tr>
+          <tr><th rowspan="2">Plass</th><th rowspan="2">Navn</th>${headerCells}<th rowspan="2">Totaltid</th></tr>
+          <tr><td colspan="${controlCodes.length}" style="text-align:center;font-size:0.8em;color:var(--pico-muted-color,#888)">↑ Strekktid · ↓ Akkumulert</td></tr>
         </thead>
-        <tbody>
-          ${rows}
-        </tbody>
+        ${tbodies}
       </table>
     </div>
   </section>`;
@@ -215,7 +248,7 @@ function createClassSection(classResult: ClassResult, index: number): string {
     <h2>Resultater ${className} (${lengthKm} km)</h2>
     <table>
       <thead>
-        <tr><th>Plass</th><th>Navn</th><th>Klubb</th><th>Tid</th><th>+Bak</th></tr>
+        <tr><th>Plass</th><th>Navn</th><th>Klubb</th><th>Tid</th><th>Diff</th><th>km-tid</th></tr>
       </thead>
       <tbody>
         ${rows}

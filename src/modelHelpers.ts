@@ -41,3 +41,12 @@ export const formatTimeBehind = (seconds: number): string => {
 	if (seconds <= 0) return "";
 	return `+${formatTime(seconds)}`;
 };
+
+/** Format minutes:seconds per kilometre given total seconds and course length. */
+export const formatKmTime = (
+	totalSeconds: number,
+	lengthKm: number,
+): string => {
+	if (lengthKm <= 0) return "–";
+	return formatTime(Math.round(totalSeconds / lengthKm));
+};
