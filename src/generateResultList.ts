@@ -31,9 +31,12 @@ const CUSTOM_CSS = `
   .status-dnf, .status-dns, .status-dsq, .status-ovt, .status-nc { color: var(--pico-muted-color, #888); }
   .splits-table th, .splits-table td { font-size: 0.8em; white-space: nowrap; }
   .best-split { color: #c00; font-weight: bold; }
-  .second-split { color: #00c; font-weight: bold; }
+  .second-split { color: #3366ff; font-weight: bold; }
   .splits-cumul-row td { color: var(--pico-muted-color, #666); font-style: italic; font-size: 0.85em; }
+  .splits-cumul-row td.best-split { color: #c00; }
+  .splits-cumul-row td.second-split { color: #3366ff; }
   .splits-table tbody + tbody { border-top: 1px solid var(--pico-table-border-color, #ccc); }
+  .time-behind { color: var(--pico-muted-color, #666); font-size: 0.85em; }
 `;
 
 function statusLabel(status: ResultStatus | undefined): string {
@@ -121,6 +124,12 @@ function createClassResultRows(classResult: ClassResult): string {
 	return [...finishers, ...nonFinishers].join("\n");
 }
 
+function splitLegLabel(i: number, n: number): string {
+	if (i === 0) return "S-1";
+	if (i === n - 1) return `${i}-M`;
+	return `${i}-${i + 1}`;
+}
+
 function createSplitTimesTable(
 	classResult: ClassResult,
 	sectionId: string,
@@ -131,7 +140,6 @@ function createSplitTimesTable(
 
 	if (okResults.length === 0) return "";
 
-	// Collect control codes in order from the first finisher with split times
 	const firstWithSplits = okResults.find(
 		(pr) => (pr.result?.[0]?.splitTime?.length ?? 0) > 0,
 	);
@@ -140,6 +148,7 @@ function createSplitTimesTable(
 	const controlCodes =
 		firstWithSplits.result?.[0]?.splitTime?.map((st) => st.controlCode ?? "") ??
 		[];
+	const n = controlCodes.length;
 
 	// Compute leg times and cumulative times for every finisher
 	const allPersonData = okResults.map((pr) => {
@@ -160,7 +169,7 @@ function createSplitTimesTable(
 		return { pr, result, legTimes, cumulTimes };
 	});
 
-	// Find best and second-best leg time per column
+	// Best and second-best leg time per column
 	const bestLegTime: number[] = controlCodes.map((_, colIdx) => {
 		let best = Number.POSITIVE_INFINITY;
 		for (const { legTimes } of allPersonData) {
@@ -180,8 +189,31 @@ function createSplitTimesTable(
 		return second;
 	});
 
+	// Best and second-best cumulative time per column
+	const bestCumulTime: number[] = controlCodes.map((_, colIdx) => {
+		let best = Number.POSITIVE_INFINITY;
+		for (const { cumulTimes } of allPersonData) {
+			const t = cumulTimes[colIdx];
+			if (t !== undefined && t < best) best = t;
+		}
+		return best;
+	});
+
+	const secondBestCumulTime: number[] = controlCodes.map((_, colIdx) => {
+		let second = Number.POSITIVE_INFINITY;
+		const best = bestCumulTime[colIdx];
+		for (const { cumulTimes } of allPersonData) {
+			const t = cumulTimes[colIdx];
+			if (t !== undefined && t > best && t < second) second = t;
+		}
+		return second;
+	});
+
 	const headerCells = controlCodes
-		.map((code) => `<th>${escapeHtml(code)}</th>`)
+		.map(
+			(code, i) =>
+				`<th>${escapeHtml(splitLegLabel(i, n))} (${escapeHtml(code)})</th>`,
+		)
 		.join("");
 
 	const tbodies = allPersonData
@@ -190,6 +222,10 @@ function createSplitTimesTable(
 			const pos = result?.position ?? "–";
 			const totalTime =
 				result?.time !== undefined ? escapeHtml(formatTime(result.time)) : "–";
+			const diffStr =
+				result?.timeBehind !== undefined && result.timeBehind > 0
+					? `<br><span class="time-behind">${escapeHtml(formatTimeBehind(result.timeBehind))}</span>`
+					: "";
 
 			const legCells = controlCodes
 				.map((_, i) => {
@@ -209,14 +245,20 @@ function createSplitTimesTable(
 			const cumulCells = controlCodes
 				.map((_, i) => {
 					const t = cumulTimes[i];
-					return t !== undefined
-						? `<td>${escapeHtml(formatTime(t))}</td>`
-						: "<td>–</td>";
+					if (t === undefined) return "<td>–</td>";
+					const isBest = t === bestCumulTime[i];
+					const isSecond = !isBest && t === secondBestCumulTime[i];
+					const attr = isBest
+						? ' class="best-split"'
+						: isSecond
+							? ' class="second-split"'
+							: "";
+					return `<td${attr}>${escapeHtml(formatTime(t))}</td>`;
 				})
 				.join("");
 
 			return `<tbody>
-            <tr><td rowspan="2">${pos}</td><td rowspan="2">${name}</td>${legCells}<td rowspan="2">${totalTime}</td></tr>
+            <tr><td rowspan="2">${pos}</td><td rowspan="2">${name}</td>${legCells}<td rowspan="2">${totalTime}${diffStr}</td></tr>
             <tr class="splits-cumul-row">${cumulCells}</tr>
           </tbody>`;
 		})
@@ -229,7 +271,7 @@ function createSplitTimesTable(
       <table class="splits-table">
         <thead>
           <tr><th rowspan="2">Plass</th><th rowspan="2">Navn</th>${headerCells}<th rowspan="2">Totaltid</th></tr>
-          <tr><td colspan="${controlCodes.length}" style="text-align:center;font-size:0.8em;color:var(--pico-muted-color,#888)">↑ Strekktid · ↓ Akkumulert</td></tr>
+          <tr><td colspan="${n}" style="text-align:center;font-size:0.8em;color:var(--pico-muted-color,#888)">↑ Strekktid · ↓ Akkumulert</td></tr>
         </thead>
         ${tbodies}
       </table>
