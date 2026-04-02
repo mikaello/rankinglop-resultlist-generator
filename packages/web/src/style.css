@@ -49,6 +49,8 @@ main {
 }
 
 .info-badge {
+	appearance: none;
+	-webkit-appearance: none;
 	width: 1.55rem;
 	height: 1.55rem;
 	border-radius: 999px;
@@ -57,21 +59,21 @@ main {
 	line-height: 1;
 	font-weight: 700;
 	font-size: 0.95rem;
-	background: color-mix(in srgb, var(--primary) 18%, transparent);
-	color: var(--primary);
+	background: var(--primary);
+	color: var(--primary-inverse);
 	cursor: pointer;
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
 	vertical-align: middle;
-	box-shadow: 0 0 0 1px color-mix(in srgb, var(--primary) 22%, transparent);
+	box-shadow: 0 0 0 2px color-mix(in srgb, var(--primary) 30%, transparent);
 }
 
 .info-badge:hover,
 .info-badge:focus-visible {
-	background: color-mix(in srgb, var(--primary) 28%, transparent);
+	background: var(--primary-hover);
 	border-color: var(--primary-hover);
-	color: var(--primary-hover);
+	color: var(--primary-inverse);
 }
 
 #json-help-dialog pre {

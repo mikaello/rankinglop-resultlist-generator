@@ -132,7 +132,7 @@ function render(): void {
           <input type="file" id="xml-file" accept=".xml" required />
         </div>
 
-				<details class="config-accordion" open>
+				<details class="config-accordion">
 					<summary>
 						<span>Hendelsesoppsett (valgfritt)</span>
 						<small>Utvid for manuell utfylling</small>
