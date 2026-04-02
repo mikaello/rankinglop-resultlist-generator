@@ -51,29 +51,29 @@ main {
 .info-badge {
 	appearance: none;
 	-webkit-appearance: none;
-	width: 1.55rem;
-	height: 1.55rem;
+	width: 1.7rem;
+	height: 1.7rem;
 	border-radius: 999px;
-	border: 1px solid var(--primary);
+	border: 2px solid #ffcf33;
 	padding: 0;
 	line-height: 1;
 	font-weight: 700;
-	font-size: 0.95rem;
-	background: var(--primary);
-	color: var(--primary-inverse);
+	font-size: 1rem;
+	background: #ffcf33;
+	color: #1b1b1b;
 	cursor: pointer;
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
 	vertical-align: middle;
-	box-shadow: 0 0 0 2px color-mix(in srgb, var(--primary) 30%, transparent);
+	box-shadow: 0 0 0 2px color-mix(in srgb, #ffcf33 35%, transparent);
 }
 
 .info-badge:hover,
 .info-badge:focus-visible {
-	background: var(--primary-hover);
-	border-color: var(--primary-hover);
-	color: var(--primary-inverse);
+	background: #ffd95e;
+	border-color: #ffd95e;
+	color: #121212;
 }
 
 #json-help-dialog pre {
