@@ -5,6 +5,8 @@ import { parseIofXmlContent } from "@core/parseIofXmlContent";
 import picoCSS from "@picocss/pico/css/pico.classless.min.css?inline";
 import "./style.css";
 
+const DEFAULT_ORGANISER_CLUB = "IL GeoForm";
+
 function validateIofXml(xmlStr: string): string | null {
 	if (!xmlStr.includes("<ResultList")) {
 		return "Filen er ikke en IOF ResultList XML.";
@@ -83,7 +85,7 @@ function populateFormFromOptions(opts: ResultListOptions): void {
 	setVal("opt-date", opts.isoDate ?? "");
 	setVal("opt-place", opts.place ?? "");
 	setVal("opt-map", opts.map ?? "");
-	setVal("opt-club", opts.organiserClub ?? "");
+	setVal("opt-club", opts.organiserClub ?? DEFAULT_ORGANISER_CLUB);
 	setVal("opt-persons", opts.organiserPersons?.join(", ") ?? "");
 	setVal(
 		"opt-rental",
@@ -115,9 +117,7 @@ function populateFormFromOptions(opts: ResultListOptions): void {
 	);
 	setVal(
 		"opt-contingent",
-		opts.startContingent
-			? JSON.stringify(opts.startContingent, null, 2)
-			: "",
+		opts.startContingent ? JSON.stringify(opts.startContingent, null, 2) : "",
 	);
 }
 
@@ -132,14 +132,48 @@ function render(): void {
           <input type="file" id="xml-file" accept=".xml" required />
         </div>
 
-        <details>
-          <summary>Hendelsesoppsett (valgfritt)</summary>
+				<details class="config-accordion" open>
+					<summary>
+						<span>Hendelsesoppsett (valgfritt)</span>
+						<small>Utvid for manuell utfylling</small>
+					</summary>
           <div>
             <div>
-              <label for="config-json">Last opp JSON-konfigurasjon</label>
+							<label for="config-json" class="json-upload-label">
+								<span>Last opp JSON-konfigurasjon</span>
+								<button type="button" id="json-help-btn" class="info-badge" aria-label="Vis forventet JSON-format">i</button>
+							</label>
               <input type="file" id="config-json" accept=".json" />
               <small>Laster inn verdiene i feltene under automatisk.</small>
             </div>
+						<dialog id="json-help-dialog">
+							<article>
+								<header>
+									<button type="button" aria-label="Lukk" rel="prev" id="json-help-close"></button>
+									<p><strong>Forventet JSON-format</strong></p>
+								</header>
+								<p>Du kan bruke én eller flere av disse feltene:</p>
+								<pre><code>{
+	"title": "Rankingløp 1",
+	"isoDate": "2026-04-02",
+	"place": "Sognsvann",
+	"map": "Sognsvann",
+	"organiserClub": "IL GeoForm",
+	"organiserPersons": ["Ola Nordmann", "Kari Nordmann"],
+	"yearDistribution": {
+		"adults": 120,
+		"oldTeenager": 35,
+		"youngTeenager": 42,
+		"child": 18
+	},
+	"startContingent": [
+		{ "amount": 50, "quota": 100 },
+		{ "amount": 80, "quota": 50 }
+	],
+	"rentalDevices": 12
+}</code></pre>
+							</article>
+						</dialog>
             <hr />
             <div class="grid">
               <label>
@@ -164,7 +198,7 @@ function render(): void {
             <div class="grid">
               <label>
                 Arrangørklubb
-                <input type="text" id="opt-club" placeholder="f.eks. OSI" />
+								<input type="text" id="opt-club" value="IL GeoForm" placeholder="f.eks. IL GeoForm" />
               </label>
               <label>
                 Arrangørpersoner <small>(kommaseparert)</small>
@@ -180,19 +214,19 @@ function render(): void {
               <div class="grid">
                 <label>
                   Voksne (≥21 år)
-                  <input type="number" id="opt-adults" min="0" />
+									<input type="number" id="opt-adults" min="0" placeholder="0" />
                 </label>
                 <label>
                   Eldre ungdom (17–20 år)
-                  <input type="number" id="opt-old-teen" min="0" />
+									<input type="number" id="opt-old-teen" min="0" placeholder="0" />
                 </label>
                 <label>
                   Yngre ungdom (13–16 år)
-                  <input type="number" id="opt-young-teen" min="0" />
+									<input type="number" id="opt-young-teen" min="0" placeholder="0" />
                 </label>
                 <label>
                   Barn (0–12 år)
-                  <input type="number" id="opt-child" min="0" />
+									<input type="number" id="opt-child" min="0" placeholder="0" />
                 </label>
               </div>
             </fieldset>
@@ -225,10 +259,33 @@ function render(): void {
 	const resultSection = document.getElementById(
 		"result-section",
 	) as HTMLElement;
+	const jsonHelpBtn = document.getElementById(
+		"json-help-btn",
+	) as HTMLButtonElement;
+	const jsonHelpDialog = document.getElementById(
+		"json-help-dialog",
+	) as HTMLDialogElement;
+	const jsonHelpClose = document.getElementById(
+		"json-help-close",
+	) as HTMLButtonElement;
 	const downloadLink = document.getElementById(
 		"download-link",
 	) as HTMLAnchorElement;
 	const preview = document.getElementById("preview") as HTMLIFrameElement;
+
+	jsonHelpBtn.addEventListener("click", () => {
+		jsonHelpDialog.showModal();
+	});
+
+	jsonHelpClose.addEventListener("click", () => {
+		jsonHelpDialog.close();
+	});
+
+	jsonHelpDialog.addEventListener("click", (event) => {
+		if (event.target === jsonHelpDialog) {
+			jsonHelpDialog.close();
+		}
+	});
 
 	xmlInput.addEventListener("change", () => {
 		generateBtn.disabled = !xmlInput.files?.length;
