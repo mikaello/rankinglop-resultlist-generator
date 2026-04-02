@@ -54,26 +54,26 @@ main {
 	width: 1.7rem;
 	height: 1.7rem;
 	border-radius: 999px;
-	border: 2px solid #ffcf33;
+	border: 1px solid rgba(255, 255, 255, 0.9);
 	padding: 0;
 	line-height: 1;
 	font-weight: 700;
 	font-size: 1rem;
-	background: #ffcf33;
-	color: #1b1b1b;
+	background: transparent;
+	color: inherit;
 	cursor: pointer;
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
 	vertical-align: middle;
-	box-shadow: 0 0 0 2px color-mix(in srgb, #ffcf33 35%, transparent);
+	box-shadow: none;
 }
 
 .info-badge:hover,
 .info-badge:focus-visible {
-	background: #ffd95e;
-	border-color: #ffd95e;
-	color: #121212;
+	background: rgba(255, 255, 255, 0.08);
+	border-color: #ffffff;
+	color: inherit;
 }
 
 #json-help-dialog pre {
