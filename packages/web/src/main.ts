@@ -1,6 +1,6 @@
 import "@picocss/pico/css/pico.classless.min.css";
 import { createResultListHtml } from "@core/html";
-import type { ResultListOptions } from "@core/options";
+import type { ResultListOptions, YearDistribution } from "@core/options";
 import { parseIofXmlContent } from "@core/parseIofXmlContent";
 import picoCSS from "@picocss/pico/css/pico.classless.min.css?inline";
 import "./style.css";
@@ -18,6 +18,109 @@ function validateIofXml(xmlStr: string): string | null {
 	return null;
 }
 
+function getVal(id: string): string {
+	return (document.getElementById(id) as HTMLInputElement).value.trim();
+}
+
+function setVal(id: string, val: string): void {
+	(document.getElementById(id) as HTMLInputElement).value = val;
+}
+
+function buildOptionsFromForm(): ResultListOptions {
+	const options: ResultListOptions = {};
+
+	const title = getVal("opt-title");
+	if (title) options.title = title;
+
+	const date = getVal("opt-date");
+	if (date) options.isoDate = date;
+
+	const place = getVal("opt-place");
+	if (place) options.place = place;
+
+	const map = getVal("opt-map");
+	if (map) options.map = map;
+
+	const club = getVal("opt-club");
+	if (club) options.organiserClub = club;
+
+	const persons = getVal("opt-persons");
+	if (persons)
+		options.organiserPersons = persons
+			.split(",")
+			.map((s) => s.trim())
+			.filter(Boolean);
+
+	const rental = getVal("opt-rental");
+	if (rental) options.rentalDevices = Number(rental);
+
+	const adults = getVal("opt-adults");
+	const oldTeen = getVal("opt-old-teen");
+	const youngTeen = getVal("opt-young-teen");
+	const child = getVal("opt-child");
+	if (adults || oldTeen || youngTeen || child) {
+		const dist: YearDistribution = {};
+		if (adults) dist.adults = Number(adults);
+		if (oldTeen) dist.oldTeenager = Number(oldTeen);
+		if (youngTeen) dist.youngTeenager = Number(youngTeen);
+		if (child) dist.child = Number(child);
+		options.yearDistribution = dist;
+	}
+
+	const contingentStr = getVal("opt-contingent");
+	if (contingentStr) {
+		options.startContingent = JSON.parse(contingentStr) as {
+			amount: number;
+			quota: number;
+		}[];
+	}
+
+	return options;
+}
+
+function populateFormFromOptions(opts: ResultListOptions): void {
+	setVal("opt-title", opts.title ?? "");
+	setVal("opt-date", opts.isoDate ?? "");
+	setVal("opt-place", opts.place ?? "");
+	setVal("opt-map", opts.map ?? "");
+	setVal("opt-club", opts.organiserClub ?? "");
+	setVal("opt-persons", opts.organiserPersons?.join(", ") ?? "");
+	setVal(
+		"opt-rental",
+		opts.rentalDevices != null ? String(opts.rentalDevices) : "",
+	);
+	setVal(
+		"opt-adults",
+		opts.yearDistribution?.adults != null
+			? String(opts.yearDistribution.adults)
+			: "",
+	);
+	setVal(
+		"opt-old-teen",
+		opts.yearDistribution?.oldTeenager != null
+			? String(opts.yearDistribution.oldTeenager)
+			: "",
+	);
+	setVal(
+		"opt-young-teen",
+		opts.yearDistribution?.youngTeenager != null
+			? String(opts.yearDistribution.youngTeenager)
+			: "",
+	);
+	setVal(
+		"opt-child",
+		opts.yearDistribution?.child != null
+			? String(opts.yearDistribution.child)
+			: "",
+	);
+	setVal(
+		"opt-contingent",
+		opts.startContingent
+			? JSON.stringify(opts.startContingent, null, 2)
+			: "",
+	);
+}
+
 function render(): void {
 	document.body.innerHTML = `
     <main>
@@ -28,10 +131,78 @@ function render(): void {
           <label for="xml-file"><strong>IOF 3.0 XML-fil (påkrevd)</strong></label>
           <input type="file" id="xml-file" accept=".xml" required />
         </div>
-        <div>
-          <label for="config-json">Hendelsesoppsett JSON (valgfritt)</label>
-          <input type="file" id="config-json" accept=".json" />
-        </div>
+
+        <details>
+          <summary>Hendelsesoppsett (valgfritt)</summary>
+          <div>
+            <div>
+              <label for="config-json">Last opp JSON-konfigurasjon</label>
+              <input type="file" id="config-json" accept=".json" />
+              <small>Laster inn verdiene i feltene under automatisk.</small>
+            </div>
+            <hr />
+            <div class="grid">
+              <label>
+                Tittel
+                <input type="text" id="opt-title" placeholder="f.eks. Rankingløp 1" />
+              </label>
+              <label>
+                Dato
+                <input type="date" id="opt-date" />
+              </label>
+            </div>
+            <div class="grid">
+              <label>
+                Sted
+                <input type="text" id="opt-place" placeholder="f.eks. Sognsvann" />
+              </label>
+              <label>
+                Kart
+                <input type="text" id="opt-map" placeholder="f.eks. Sognsvann" />
+              </label>
+            </div>
+            <div class="grid">
+              <label>
+                Arrangørklubb
+                <input type="text" id="opt-club" placeholder="f.eks. OSI" />
+              </label>
+              <label>
+                Arrangørpersoner <small>(kommaseparert)</small>
+                <input type="text" id="opt-persons" placeholder="f.eks. Ola Nordmann, Kari Nordmann" />
+              </label>
+            </div>
+            <label>
+              Leieenheter
+              <input type="number" id="opt-rental" min="0" placeholder="0" style="max-width: 12rem;" />
+            </label>
+            <fieldset>
+              <legend>Aldersdistribusjon av deltakere</legend>
+              <div class="grid">
+                <label>
+                  Voksne (≥21 år)
+                  <input type="number" id="opt-adults" min="0" />
+                </label>
+                <label>
+                  Eldre ungdom (17–20 år)
+                  <input type="number" id="opt-old-teen" min="0" />
+                </label>
+                <label>
+                  Yngre ungdom (13–16 år)
+                  <input type="number" id="opt-young-teen" min="0" />
+                </label>
+                <label>
+                  Barn (0–12 år)
+                  <input type="number" id="opt-child" min="0" />
+                </label>
+              </div>
+            </fieldset>
+            <label>
+              Startkontigent (JSON)
+              <textarea id="opt-contingent" rows="3" placeholder='[{"amount": 50, "quota": 100}]'></textarea>
+            </label>
+          </div>
+        </details>
+
         <button id="generate-btn" disabled>Generer resultatliste</button>
       </form>
       <div id="error-msg" style="display: none; color: #c00; margin: 1rem 0;"></div>
@@ -65,6 +236,19 @@ function render(): void {
 		errorMsg.style.display = "none";
 	});
 
+	configInput.addEventListener("change", async () => {
+		const file = configInput.files?.[0];
+		if (!file) return;
+		try {
+			const opts = JSON.parse(await file.text()) as ResultListOptions;
+			populateFormFromOptions(opts);
+			errorMsg.style.display = "none";
+		} catch {
+			errorMsg.textContent = "Ugyldig JSON i konfigurasjonsfilen.";
+			errorMsg.style.display = "";
+		}
+	});
+
 	generateBtn.addEventListener("click", async (e) => {
 		e.preventDefault();
 		const xmlFile = xmlInput.files?.[0];
@@ -82,18 +266,8 @@ function render(): void {
 				return;
 			}
 
-			// Read optional config
-			let options: ResultListOptions = {};
-			const configFile = configInput.files?.[0];
-			if (configFile) {
-				try {
-					options = JSON.parse(await configFile.text()) as ResultListOptions;
-				} catch {
-					errorMsg.textContent = "Ugyldig JSON i konfigurasjonsfilen.";
-					errorMsg.style.display = "";
-					return;
-				}
-			}
+			// Build options from form fields
+			const options = buildOptionsFromForm();
 
 			// Parse and generate
 			const resultList = parseIofXmlContent(xmlStr);
