@@ -23,7 +23,7 @@
 		"build": "tsup",
 		"typecheck": "tsc --noEmit",
 		"lint": "biome check --write .",
-		"test": "node --test test/*.test.ts"
+		"test": "node --import tsx --test test/*.test.ts"
 	},
 	"dependencies": {
 		"@picocss/pico": "2.1.1",
@@ -48,6 +48,7 @@
 		"@biomejs/biome": "2.4.10",
 		"@types/node": "25.5.0",
 		"tsup": "8.5.1",
+		"tsx": "4.21.0",
 		"typescript": "6.0.2"
 	}
 }

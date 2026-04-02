@@ -1,8 +1,8 @@
 import "@picocss/pico/css/pico.classless.min.css";
-import picoCSS from "@picocss/pico/css/pico.classless.min.css?inline";
 import { createResultListHtml } from "@core/html";
-import { parseIofXmlContent } from "@core/parseIofXmlContent";
 import type { ResultListOptions } from "@core/options";
+import { parseIofXmlContent } from "@core/parseIofXmlContent";
+import picoCSS from "@picocss/pico/css/pico.classless.min.css?inline";
 import "./style.css";
 
 function validateIofXml(xmlStr: string): string | null {
@@ -43,13 +43,20 @@ function render(): void {
     </main>
   `;
 
-	const uploadForm = document.getElementById("upload-form") as HTMLFormElement;
 	const xmlInput = document.getElementById("xml-file") as HTMLInputElement;
-	const configInput = document.getElementById("config-json") as HTMLInputElement;
-	const generateBtn = document.getElementById("generate-btn") as HTMLButtonElement;
+	const configInput = document.getElementById(
+		"config-json",
+	) as HTMLInputElement;
+	const generateBtn = document.getElementById(
+		"generate-btn",
+	) as HTMLButtonElement;
 	const errorMsg = document.getElementById("error-msg") as HTMLDivElement;
-	const resultSection = document.getElementById("result-section") as HTMLElement;
-	const downloadLink = document.getElementById("download-link") as HTMLAnchorElement;
+	const resultSection = document.getElementById(
+		"result-section",
+	) as HTMLElement;
+	const downloadLink = document.getElementById(
+		"download-link",
+	) as HTMLAnchorElement;
 	const preview = document.getElementById("preview") as HTMLIFrameElement;
 
 	xmlInput.addEventListener("change", () => {
@@ -82,8 +89,7 @@ function render(): void {
 				try {
 					options = JSON.parse(await configFile.text()) as ResultListOptions;
 				} catch {
-					errorMsg.textContent =
-						"Ugyldig JSON i konfigurasjonsfilen.";
+					errorMsg.textContent = "Ugyldig JSON i konfigurasjonsfilen.";
 					errorMsg.style.display = "";
 					return;
 				}
@@ -96,8 +102,7 @@ function render(): void {
 			// Create download blob
 			const blob = new Blob([html], { type: "text/html;charset=utf-8" });
 			const url = URL.createObjectURL(blob);
-			const filename =
-				xmlFile.name.replace(/\.xml$/i, "") + ".html";
+			const filename = `${xmlFile.name.replace(/\.xml$/i, "")}.html`;
 			downloadLink.href = url;
 			downloadLink.download = filename;
 			downloadLink.textContent = `Last ned ${filename}`;

@@ -15,7 +15,7 @@ function runCli(args: string[]): {
 } {
 	const result = spawnSync(
 		process.execPath,
-		[join(rootDir, "src", "cli.ts"), ...args],
+		["--import", "tsx", join(rootDir, "src", "cli.ts"), ...args],
 		{ encoding: "utf8" },
 	);
 	return {
