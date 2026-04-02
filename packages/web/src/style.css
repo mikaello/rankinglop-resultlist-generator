@@ -17,10 +17,10 @@ main {
 }
 
 .config-accordion {
-	border: 1px solid #d3dce6;
+	border: 1px solid var(--muted-border-color);
 	border-radius: 12px;
 	padding: 0.25rem 1rem 1rem;
-	background: linear-gradient(180deg, #f7fbff 0%, #ffffff 100%);
+	background: var(--card-background-color);
 	margin: 1rem 0;
 }
 
@@ -34,7 +34,7 @@ main {
 .config-accordion > summary small {
 	display: block;
 	font-weight: 500;
-	opacity: 0.75;
+	color: var(--muted-color);
 	font-size: 0.85rem;
 }
 
@@ -48,20 +48,20 @@ main {
 	width: 1.35rem;
 	height: 1.35rem;
 	border-radius: 999px;
-	border: 1px solid #60758a;
+	border: 1px solid var(--muted-border-color);
 	padding: 0;
 	line-height: 1;
 	font-weight: 700;
 	font-size: 0.85rem;
-	background: #e9f2ff;
-	color: #14324d;
+	background: var(--card-sectioning-background-color);
+	color: var(--color);
 	cursor: pointer;
 }
 
 #json-help-dialog pre {
 	max-height: 45vh;
 	overflow: auto;
-	background: #f5f7fa;
+	background: var(--code-background-color);
 	padding: 0.75rem;
 	border-radius: 8px;
 }
