@@ -8,8 +8,9 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const exampleXml = join(
 	__dirname,
 	"..",
-	"examples",
-	"example_iof_resultlist.xml",
+	"src",
+	"resources",
+	"res2021-09-18.xml",
 );
 
 describe("parseIofXml", () => {
@@ -32,24 +33,24 @@ describe("parseIofXml", () => {
 	it("parses the first finisher name and time in class Lang", () => {
 		const rl = parseIofXml(exampleXml);
 		const firstResult = rl.classResult?.[0].personResult?.[0];
-		assert.equal(firstResult?.person?.name?.family, "Melsom");
-		assert.equal(firstResult?.person?.name?.given, "Einar");
-		assert.equal(firstResult?.result?.[0].time, 2344);
+		assert.equal(firstResult?.person?.name?.family, "Vogelsang");
+		assert.equal(firstResult?.person?.name?.given, "Christian");
+		assert.equal(firstResult?.result?.[0].time, 2282);
 	});
 
 	it("parses the first finisher organisation", () => {
 		const rl = parseIofXml(exampleXml);
 		const firstResult = rl.classResult?.[0].personResult?.[0];
-		assert.equal(firstResult?.organisation?.name, "Fossum IF");
+		assert.equal(firstResult?.organisation?.name, "Nydalens SK");
 	});
 
 	it("parses split times for the first finisher", () => {
 		const rl = parseIofXml(exampleXml);
 		const splitTimes =
 			rl.classResult?.[0].personResult?.[0].result?.[0].splitTime;
-		assert.equal(splitTimes?.length, 14);
-		assert.equal(splitTimes?.[0].controlCode, "31");
-		assert.equal(splitTimes?.[0].time, 56);
+		assert.equal(splitTimes?.length, 18);
+		assert.equal(splitTimes?.[0].controlCode, "101");
+		assert.equal(splitTimes?.[0].time, 121);
 	});
 
 	it("parses OK status for finishers", () => {
@@ -80,8 +81,8 @@ describe("parseIofXml", () => {
 		assert.equal(rl.iofVersion, "3.0");
 	});
 
-	it("returns 27 participants in the Lang class", () => {
+	it("returns 31 participants in the Lang class", () => {
 		const rl = parseIofXml(exampleXml);
-		assert.equal(rl.classResult?.[0].personResult?.length, 27);
+		assert.equal(rl.classResult?.[0].personResult?.length, 31);
 	});
 });

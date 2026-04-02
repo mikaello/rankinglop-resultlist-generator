@@ -6,7 +6,7 @@ import { fileURLToPath } from "node:url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const rootDir = join(__dirname, "..");
-const exampleXml = join(rootDir, "examples", "example_iof_resultlist.xml");
+const exampleXml = join(rootDir, "src", "resources", "res2021-09-18.xml");
 
 function runCli(args: string[]): {
 	stdout: string;
@@ -58,7 +58,10 @@ describe("CLI smoke tests", () => {
 
 	it("HTML contains the winner's name", () => {
 		const { stdout } = runCli(["--input", exampleXml]);
-		assert.ok(stdout.includes("Melsom"), "should contain winner Melsom");
+		assert.ok(
+			stdout.includes("Christian Vogelsang"),
+			"should contain winner Christian Vogelsang",
+		);
 	});
 
 	it("HTML contains status label for MissingPunch results", () => {
