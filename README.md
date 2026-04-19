@@ -1,9 +1,9 @@
 # rankinglop-resultlist-generator
 
 A command-line tool **and library** that converts an IOF 3.0 XML result list
-(as exported by [Otime](https://otime.no)) into a self-contained HTML page
+(as exported by Otime) into a self-contained HTML page
 with modern, responsive styling.
-Built for the [GeoForm Rankingløp](https://www.ilgeoform.no) series.
+Built for the [GeoForm Rankingløp](https://ilgeoform.no) series.
 
 ## Requirements
 
