@@ -5,6 +5,13 @@ A command-line tool **and library** that converts an IOF 3.0 XML result list
 with modern, responsive styling.
 Built for the [GeoForm Rankingløp](https://ilgeoform.no) series.
 
+## Web app
+
+A browser-based version is available at
+<https://mikaello.github.io/rankinglop-resultlist-generator/>.
+Upload an IOF 3.0 XML file, fill in optional event metadata, and download the
+generated HTML — no installation required.
+
 ## Requirements
 
 Node.js 22.18.0 or later (runs TypeScript files natively — no compilation step
