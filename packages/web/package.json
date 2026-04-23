@@ -10,7 +10,7 @@
 	},
 	"dependencies": {
 		"@picocss/pico": "2.1.1",
-		"fast-xml-parser": "5.5.9"
+		"fast-xml-parser": "5.7.0"
 	},
 	"devDependencies": {
 		"typescript": "6.0.2",
