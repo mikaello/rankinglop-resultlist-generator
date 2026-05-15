@@ -1,4 +1,7 @@
-export { createGenericResultListHtml } from "./genericHtml.ts";
+export {
+	createGenericResultListHtml,
+	createGenericResultListHtmlFromXml,
+} from "./genericHtml.ts";
 export { createResultListHtml } from "./html.ts";
 export type {
 	ClassResult,
