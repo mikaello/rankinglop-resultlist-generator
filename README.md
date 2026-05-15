@@ -1,5 +1,8 @@
 # rankinglop-resultlist-generator
 
+[![npm version](https://img.shields.io/npm/v/@mikaello/rankinglop-resultlist-generator?logo=npm)](https://www.npmjs.com/package/@mikaello/rankinglop-resultlist-generator)
+[![license](https://img.shields.io/npm/l/@mikaello/rankinglop-resultlist-generator)](./LICENSE)
+
 A command-line tool **and library** that converts an IOF 3.0 XML result list
 (as exported by Otime) into a self-contained HTML page
 with modern, responsive styling.
@@ -22,14 +25,14 @@ needed for local development).
 ### As a global CLI
 
 ```bash
-npm install -g rankinglop-resultlist-generator
+npm install -g @mikaello/rankinglop-resultlist-generator
 rankinglop --input result.xml --output result.html
 ```
 
 ### In a project
 
 ```bash
-npm install rankinglop-resultlist-generator
+npm install @mikaello/rankinglop-resultlist-generator
 ```
 
 ### For local development
@@ -100,7 +103,7 @@ import {
   createResultListHtml,
   type ResultList,
   type ResultListOptions,
-} from "rankinglop-resultlist-generator";
+} from "@mikaello/rankinglop-resultlist-generator";
 
 // 1. Parse an IOF 3.0 XML string into a typed model
 const resultList: ResultList = parseIofXmlContent(xmlString);
@@ -141,9 +144,9 @@ If you don't want to manage the CSS yourself, the Node.js-only
 automatically:
 
 ```ts
-import { createResultListDocument } from "rankinglop-resultlist-generator/node";
+import { createResultListDocument } from "@mikaello/rankinglop-resultlist-generator/node";
 // or via the full path:
-import { createResultListDocument } from "rankinglop-resultlist-generator/src/generateResultList.ts";
+import { createResultListDocument } from "@mikaello/rankinglop-resultlist-generator/src/generateResultList.ts";
 ```
 
 ## npm scripts
