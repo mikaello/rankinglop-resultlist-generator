@@ -1,6 +1,6 @@
 {
-	"name": "rankinglop-resultlist-generator",
-	"version": "1.0.0",
+	"name": "@mikaello/rankinglop-resultlist-generator",
+	"version": "0.0.1",
 	"description": "Generate old school HTML file when given an IOF v3 XML file",
 	"type": "module",
 	"main": "dist/index.js",
@@ -20,6 +20,7 @@
 	],
 	"scripts": {
 		"start": "node src/cli.ts",
+		"prepublish": "npm run build",
 		"build": "tsup",
 		"typecheck": "tsc --noEmit",
 		"lint": "biome check --write .",
