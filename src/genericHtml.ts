@@ -4,31 +4,33 @@ import {
 	createResultListSections,
 } from "./body.ts";
 import { escapeHtml } from "./escapeHtml.ts";
-import { createResultListHeader } from "./generateResultListHeader.ts";
+import { createGenericHeader } from "./genericHeader.ts";
 import type { ResultList } from "./model.ts";
 import type { ResultListOptions } from "./options.ts";
 
 /**
- * Generate a complete self-contained HTML result list document with the
- * Rankingløp-specific event header (club distribution, year distribution,
- * kontingent, leiebrikker, etc.).
+ * Generate a complete self-contained HTML result list document with a
+ * minimal, generic event header.
  *
- * Browser and Node.js compatible — the caller supplies the Pico CSS string.
+ * Unlike createResultListHtml, this entry point omits the Rankingløp-specific
+ * sections (club distribution, year distribution, kontingent, leiebrikker).
+ * It is intended for general IOF result list rendering and reuse from other
+ * applications that just want a clean result list preview.
  *
  * @param resultList - Parsed IOF result list model
- * @param options    - Optional event metadata (title, date, organiser, etc.)
+ * @param options    - Optional event metadata; only title/date/place/map/organiser are used
  * @param picoCSS    - Pico CSS classless stylesheet as a string (embedded inline)
  */
-export const createResultListHtml = (
+export const createGenericResultListHtml = (
 	resultList: ResultList,
 	options: ResultListOptions,
 	picoCSS: string,
 ): string => {
 	const title = escapeHtml(
-		options.title ?? resultList.event?.name ?? "Rankingløp",
+		options.title ?? resultList.event?.name ?? "Resultatliste",
 	);
 
-	const headerHtml = createResultListHeader(options, resultList);
+	const headerHtml = createGenericHeader(resultList, options);
 	const navHtml = createResultListNav(resultList);
 	const sectionsHtml = createResultListSections(resultList);
 

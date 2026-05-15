@@ -115,10 +115,17 @@ const html: string = createResultListHtml(resultList, options, picoCSS);
   No file-system access — works in Node.js and browsers.
 
 `createResultListHtml(resultList, options, picoCSS): string`
-: Generate a complete self-contained HTML document.
+: Generate a complete self-contained HTML document with the Rankingløp-specific
+  header (club distribution, year distribution, kontingent, leiebrikker).
   `picoCSS` is the content of `@picocss/pico/css/pico.classless.min.css` as a
   string.
   In Node.js you can `readFileSync` it; in a Vite project use a `?inline` import.
+
+`createGenericResultListHtml(resultList, options, picoCSS): string`
+: Same signature, but emits a minimal generic event header (title, date, place,
+  map, organiser) instead of the Rankingløp-specific one.
+  Intended for reuse from other applications that want a clean result list
+  preview without the GeoForm-specific reporting fields.
 
 ### Node.js convenience wrapper
 

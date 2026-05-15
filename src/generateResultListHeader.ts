@@ -1,6 +1,6 @@
 import { escapeHtml } from "./escapeHtml.ts";
 import type { ResultList } from "./model.ts";
-import { getClassName, getOrganisationName } from "./modelHelpers.ts";
+import { getOrganisationName } from "./modelHelpers.ts";
 import type { ResultListOptions, YearDistribution } from "./options.ts";
 
 type ClubRegex = { clubName: string; clubRegex: RegExp };
@@ -102,15 +102,6 @@ export const createResultListHeader = (
 		? `${organiserClub} v/${organiserPersons}`
 		: organiserClub;
 
-	const navLinks = (resultList.classResult ?? [])
-		.map((cr, i) => {
-			const name = escapeHtml(getClassName(cr));
-			const count = cr.personResult?.length ?? 0;
-			return `<li><a href="#class-${i}">${name} (${count})</a></li>
-        <li><a href="#splits-${i}">${name} strekktider</a></li>`;
-		})
-		.join("\n        ");
-
 	return `
   <header>
     <hgroup>
@@ -126,10 +117,5 @@ export const createResultListHeader = (
       <dt>Betalt</dt><dd>kr. 50: ${totalParticipation - numDiscounts} &nbsp; kr. 30: ${numDiscounts - numPostInvoices} &nbsp; kr. 0: ${numPostInvoices}</dd>
       <dt>Leiebrikker</dt><dd>${options.rentalDevices ?? 0} stk</dd>
     </dl>
-  </header>
-  <nav>
-    <ul>
-      ${navLinks}
-    </ul>
-  </nav>`;
+  </header>`;
 };
