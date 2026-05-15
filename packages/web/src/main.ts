@@ -7,6 +7,28 @@ import "./style.css";
 
 const DEFAULT_ORGANISER_CLUB = "IL GeoForm";
 
+/**
+ * Decode raw XML bytes respecting the encoding declared in the XML prolog.
+ * The prolog is always ASCII-compatible, so we can safely peek at it as
+ * Latin-1 before committing to a full decode. Falls back to UTF-8 when no
+ * declaration is present or the declared label is unrecognised.
+ *
+ * Norwegian timing software (Otime, etc.) commonly exports IOF XML with
+ * encoding="ISO-8859-1", and File.text() always decodes as UTF-8 — which
+ * would mangle æ/ø/å in those files.
+ */
+function decodeXmlBytes(bytes: Uint8Array): string {
+	const peek = new TextDecoder("latin1").decode(bytes.subarray(0, 200));
+	const match = peek.match(/encoding=["']([^"']+)["']/i);
+	const encoding = match?.[1] ?? "UTF-8";
+	try {
+		return new TextDecoder(encoding).decode(bytes);
+	} catch {
+		// Unknown encoding label — fall back to UTF-8
+		return new TextDecoder("UTF-8").decode(bytes);
+	}
+}
+
 function validateIofXml(xmlStr: string): string | null {
 	if (!xmlStr.includes("<ResultList")) {
 		return "Filen er ikke en IOF ResultList XML.";
@@ -312,8 +334,8 @@ function render(): void {
 		if (!xmlFile) return;
 
 		try {
-			// Read XML
-			const xmlStr = await xmlFile.text();
+			// Read XML, honouring the encoding declared in the prolog
+			const xmlStr = decodeXmlBytes(new Uint8Array(await xmlFile.arrayBuffer()));
 
 			// Validate
 			const validError = validateIofXml(xmlStr);
