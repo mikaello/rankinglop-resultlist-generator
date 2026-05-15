@@ -7,6 +7,7 @@ import { escapeHtml } from "./escapeHtml.ts";
 import { createGenericHeader } from "./genericHeader.ts";
 import type { ResultList } from "./model.ts";
 import type { ResultListOptions } from "./options.ts";
+import { parseIofXmlContent } from "./parseIofXmlContent.ts";
 
 /**
  * Generate a complete self-contained HTML result list document with a
@@ -52,3 +53,19 @@ export const createGenericResultListHtml = (
 </body>
 </html>`;
 };
+
+/**
+ * Generate a generic result list HTML document directly from an IOF 3.0 XML
+ * string. Parses the XML with parseIofXmlContent and delegates to
+ * createGenericResultListHtml.
+ *
+ * This is the recommended entry point for consumers whose contract with this
+ * library is "IOF XML in, HTML out" — for example, an editor that exports
+ * IOF XML and wants to render that exact same XML as a verification step.
+ */
+export const createGenericResultListHtmlFromXml = (
+	xmlString: string,
+	options: ResultListOptions,
+	picoCSS: string,
+): string =>
+	createGenericResultListHtml(parseIofXmlContent(xmlString), options, picoCSS);

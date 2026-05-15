@@ -4,7 +4,10 @@ import { createRequire } from "node:module";
 import { dirname, join } from "node:path";
 import { describe, it } from "node:test";
 import { fileURLToPath } from "node:url";
-import { createGenericResultListHtml } from "../src/genericHtml.ts";
+import {
+	createGenericResultListHtml,
+	createGenericResultListHtmlFromXml,
+} from "../src/genericHtml.ts";
 import { parseIofXmlContent } from "../src/parseIofXmlContent.ts";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -64,5 +67,26 @@ describe("createGenericResultListHtml", () => {
 		const html = renderExample({ title: "<script>alert(1)</script>" });
 		assert.ok(!html.includes("<script>alert(1)</script>"));
 		assert.ok(html.includes("&lt;script&gt;"));
+	});
+});
+
+describe("createGenericResultListHtmlFromXml", () => {
+	it("produces the same output as parseIofXmlContent + createGenericResultListHtml", () => {
+		const xml = readFileSync(exampleXml, "utf8");
+		const viaXml = createGenericResultListHtmlFromXml(xml, {}, picoCSS);
+		const viaModel = createGenericResultListHtml(
+			parseIofXmlContent(xml),
+			{},
+			picoCSS,
+		);
+		assert.equal(viaXml, viaModel);
+	});
+
+	it("renders class sections from an IOF XML string", () => {
+		const xml = readFileSync(exampleXml, "utf8");
+		const html = createGenericResultListHtmlFromXml(xml, {}, picoCSS);
+		assert.ok(html.startsWith("<!DOCTYPE html>"));
+		assert.ok(html.includes("Resultater Lang"));
+		assert.ok(html.includes("Strekktider"));
 	});
 });

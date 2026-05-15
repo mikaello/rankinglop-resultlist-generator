@@ -127,6 +127,13 @@ const html: string = createResultListHtml(resultList, options, picoCSS);
   Intended for reuse from other applications that want a clean result list
   preview without the GeoForm-specific reporting fields.
 
+`createGenericResultListHtmlFromXml(xmlString, options, picoCSS): string`
+: Convenience wrapper that takes an IOF 3.0 XML string, parses it with
+  `parseIofXmlContent`, and renders it via `createGenericResultListHtml`.
+  Use this when your contract with the library is "IOF XML in, HTML out" —
+  for example, an editor that wants to render its exported XML as a
+  verification preview.
+
 ### Node.js convenience wrapper
 
 If you don't want to manage the CSS yourself, the Node.js-only
