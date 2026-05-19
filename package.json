@@ -1,10 +1,11 @@
 {
 	"name": "@mikaello/rankinglop-resultlist-generator",
-	"version": "0.0.1",
+	"version": "0.0.2",
 	"description": "Generate old school HTML file when given an IOF v3 XML file",
 	"type": "module",
 	"main": "dist/index.js",
 	"types": "dist/index.d.ts",
+	"sideEffects": false,
 	"exports": {
 		".": {
 			"import": "./dist/index.js",
