@@ -120,10 +120,22 @@ function splitLegLabel(i: number, n: number): string {
 	return `${i}-${i + 1}`;
 }
 
+/**
+ * Whether the class renders a split-times section. Single source of truth so the
+ * nav link (createResultListNav) and the section (createSplitTimesTable) stay in sync.
+ */
+function classHasSplitTimes(classResult: ClassResult): boolean {
+	return (classResult.personResult ?? []).some(
+		(pr) => (pr.result?.[0]?.splitTime?.length ?? 0) > 0,
+	);
+}
+
 function createSplitTimesTable(
 	classResult: ClassResult,
 	sectionId: string,
 ): string {
+	if (!classHasSplitTimes(classResult)) return "";
+
 	const allPersonResults = classResult.personResult ?? [];
 	const okResults = allPersonResults.filter(
 		(pr) => !pr.result?.[0]?.status || pr.result[0].status === "OK",
@@ -134,8 +146,6 @@ function createSplitTimesTable(
 			pr.result[0].status !== "OK" &&
 			(pr.result[0].splitTime?.length ?? 0) > 0,
 	);
-
-	if (okResults.length === 0 && nonOkWithSplits.length === 0) return "";
 
 	const firstWithSplits =
 		okResults.find((pr) => (pr.result?.[0]?.splitTime?.length ?? 0) > 0) ??
@@ -323,8 +333,11 @@ export const createResultListNav = (resultList: ResultList): string => {
 		.map((cr, i) => {
 			const name = escapeHtml(getClassName(cr));
 			const count = cr.personResult?.length ?? 0;
-			return `<li><a href="#class-${i}">${name} (${count})</a></li>
-        <li><a href="#splits-${i}">${name} strekktider</a></li>`;
+			const classLink = `<li><a href="#class-${i}">${name} (${count})</a></li>`;
+			const splitsLink = classHasSplitTimes(cr)
+				? `\n        <li><a href="#splits-${i}">${name} strekktider</a></li>`
+				: "";
+			return `${classLink}${splitsLink}`;
 		})
 		.join("\n        ");
 

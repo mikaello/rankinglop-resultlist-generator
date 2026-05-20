@@ -70,6 +70,66 @@ describe("createGenericResultListHtml", () => {
 	});
 });
 
+describe("split-times nav link", () => {
+	const minimalResult = (withSplits: boolean) => ({
+		person: { name: { given: "Kari", family: "Nordmann" } },
+		result: [
+			{
+				time: 1234,
+				position: 1,
+				status: "OK" as const,
+				splitTime: withSplits ? [{ controlCode: "31", time: 100 }] : [],
+			},
+		],
+	});
+
+	it("omits the strekktider link for classes without split times", () => {
+		const resultList = {
+			classResult: [
+				{ clazz: { name: "Nosplits" }, personResult: [minimalResult(false)] },
+			],
+		};
+		const html = createGenericResultListHtml(resultList, {}, picoCSS);
+		assert.ok(!html.includes("#splits-0"), "nav should not link to #splits-0");
+		assert.ok(
+			!html.includes("Nosplits strekktider"),
+			"nav should not show a strekktider entry",
+		);
+		assert.ok(
+			!html.includes('id="splits-0"'),
+			"no split-times section should be rendered",
+		);
+	});
+
+	it("renders the strekktider link for classes with split times", () => {
+		const resultList = {
+			classResult: [
+				{ clazz: { name: "Withsplits" }, personResult: [minimalResult(true)] },
+			],
+		};
+		const html = createGenericResultListHtml(resultList, {}, picoCSS);
+		assert.ok(html.includes("#splits-0"), "nav should link to #splits-0");
+		assert.ok(
+			html.includes('id="splits-0"'),
+			"split-times section is rendered",
+		);
+	});
+
+	it("keeps anchors and sections aligned across mixed classes", () => {
+		const resultList = {
+			classResult: [
+				{ clazz: { name: "Nosplits" }, personResult: [minimalResult(false)] },
+				{ clazz: { name: "Withsplits" }, personResult: [minimalResult(true)] },
+			],
+		};
+		const html = createGenericResultListHtml(resultList, {}, picoCSS);
+		// Only the second class has splits, so its anchor and section must both exist.
+		assert.ok(!html.includes("#splits-0"));
+		assert.ok(html.includes("#splits-1"));
+		assert.ok(html.includes('id="splits-1"'));
+	});
+});
+
 describe("createGenericResultListHtmlFromXml", () => {
 	it("produces the same output as parseIofXmlContent + createGenericResultListHtml", () => {
 		const xml = readFileSync(exampleXml, "utf8");
