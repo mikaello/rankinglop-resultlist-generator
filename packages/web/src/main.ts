@@ -3,6 +3,7 @@ import { createResultListHtml } from "@core/html";
 import type { ResultListOptions, YearDistribution } from "@core/options";
 import { parseIofXmlContent } from "@core/parseIofXmlContent";
 import picoCSS from "@picocss/pico/css/pico.classless.min.css?inline";
+import { readXmlFromFile } from "./zip.js";
 import "./style.css";
 
 const DEFAULT_ORGANISER_CLUB = "IL GeoForm";
@@ -150,8 +151,8 @@ function render(): void {
       <p>Last opp en IOF 3.0 XML resultatliste og få en selvinneholdt HTML-fil til nedlasting.</p>
       <form id="upload-form">
         <div>
-          <label for="xml-file"><strong>IOF 3.0 XML-fil (påkrevd)</strong></label>
-          <input type="file" id="xml-file" accept=".xml" required />
+          <label for="xml-file"><strong>IOF 3.0 XML-fil eller ZIP (påkrevd)</strong></label>
+          <input type="file" id="xml-file" accept=".xml,.zip,application/xml,text/xml,application/zip,application/x-zip-compressed" required />
         </div>
 
 				<details class="config-accordion">
@@ -334,8 +335,9 @@ function render(): void {
 		if (!xmlFile) return;
 
 		try {
-			// Read XML, honouring the encoding declared in the prolog
-			const xmlStr = decodeXmlBytes(new Uint8Array(await xmlFile.arrayBuffer()));
+			// Read XML, handling both plain .xml and .zip files
+			const { xmlBytes, displayName } = await readXmlFromFile(xmlFile);
+			const xmlStr = decodeXmlBytes(xmlBytes);
 
 			// Validate
 			const validError = validateIofXml(xmlStr);
@@ -352,10 +354,13 @@ function render(): void {
 			const resultList = parseIofXmlContent(xmlStr);
 			const html = createResultListHtml(resultList, options, picoCSS);
 
-			// Create download blob
+			// Create download blob — base filename from the inner XML name
 			const blob = new Blob([html], { type: "text/html;charset=utf-8" });
 			const url = URL.createObjectURL(blob);
-			const filename = `${xmlFile.name.replace(/\.xml$/i, "")}.html`;
+			const innerName = displayName.includes(" › ")
+				? (displayName.split(" › ").pop() ?? displayName)
+				: displayName;
+			const filename = `${innerName.replace(/\.xml$/i, "")}.html`;
 			downloadLink.href = url;
 			downloadLink.download = filename;
 			downloadLink.textContent = `Last ned ${filename}`;
