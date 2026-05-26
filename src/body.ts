@@ -140,16 +140,15 @@ function createSplitTimesTable(
 	const okResults = allPersonResults.filter(
 		(pr) => !pr.result?.[0]?.status || pr.result[0].status === "OK",
 	);
-	const nonOkWithSplits = allPersonResults.filter(
+	const nonOkResults = allPersonResults.filter(
 		(pr) =>
 			pr.result?.[0]?.status &&
-			pr.result[0].status !== "OK" &&
-			(pr.result[0].splitTime?.length ?? 0) > 0,
+			pr.result[0].status !== "OK",
 	);
 
 	const firstWithSplits =
 		okResults.find((pr) => (pr.result?.[0]?.splitTime?.length ?? 0) > 0) ??
-		nonOkWithSplits[0];
+		nonOkResults.find((pr) => (pr.result?.[0]?.splitTime?.length ?? 0) > 0);
 	if (!firstWithSplits) return "";
 
 	const controlCodes =
@@ -159,7 +158,7 @@ function createSplitTimesTable(
 	const n = controlCodes.length + 1;
 
 	// Compute leg times and cumulative times for all runners (OK first, non-OK at bottom).
-	const allPersonData = [...okResults, ...nonOkWithSplits].map((pr) => {
+	const allPersonData = [...okResults, ...nonOkResults].map((pr) => {
 		const result = pr.result?.[0];
 		const splitTimes = result?.splitTime ?? [];
 		const timeByCode = new Map(
