@@ -17,8 +17,8 @@ export const getClubDistribution = (
 	resultList.classResult?.forEach((classResult) => {
 		classResult.personResult?.forEach((personResult) => {
 			for (const c of clubs) {
-				const org = getOrganisationName(personResult.organisation);
-				if (org && c.clubRegex.test(org)) {
+				const org = getOrganisationName(personResult.organisation) ?? "";
+				if (c.clubRegex.test(org)) {
 					const club = clubP.get(c.clubName);
 					if (club) club.count++;
 					break;
