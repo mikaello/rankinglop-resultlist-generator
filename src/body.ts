@@ -28,7 +28,39 @@ export const BODY_CUSTOM_CSS = `
   .splits-cumul-row td.second-split { color: #3366ff; }
   .splits-table tbody + tbody { border-top: 1px solid var(--pico-table-border-color, #ccc); }
   .time-behind { color: var(--pico-muted-color, #666); font-size: 0.85em; }
+  #theme-toggle { position: fixed; top: 0.75rem; right: 0.75rem; font-size: 1.25rem; background: none; border: none; cursor: pointer; padding: 0.25rem; line-height: 1; z-index: 100; }
 `;
+
+export const THEME_TOGGLE_SCRIPT = `
+<script>
+  (function() {
+    var STORAGE_KEY = 'theme';
+    var html = document.documentElement;
+    var btn = document.getElementById('theme-toggle');
+    function getSystemTheme() {
+      return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    }
+    function getEffectiveTheme() {
+      return localStorage.getItem(STORAGE_KEY) || getSystemTheme();
+    }
+    function applyTheme(theme) {
+      html.setAttribute('data-theme', theme);
+      if (btn) btn.textContent = theme === 'dark' ? '☀️' : '🌙';
+    }
+    applyTheme(getEffectiveTheme());
+    if (btn) {
+      btn.addEventListener('click', function() {
+        var current = html.getAttribute('data-theme') || getSystemTheme();
+        var next = current === 'dark' ? 'light' : 'dark';
+        localStorage.setItem(STORAGE_KEY, next);
+        applyTheme(next);
+      });
+    }
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function(e) {
+      if (!localStorage.getItem(STORAGE_KEY)) applyTheme(e.matches ? 'dark' : 'light');
+    });
+  })();
+</script>`;
 
 function statusLabel(status: ResultStatus | undefined): string {
 	switch (status) {
