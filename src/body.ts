@@ -12,6 +12,7 @@ import {
 
 export const BODY_CUSTOM_CSS = `
   body { max-width: 960px; margin: 0 auto; padding: 0 1rem; }
+  main { padding-left: 0; padding-right: 0; }
   header dl { display: grid; grid-template-columns: max-content 1fr; gap: 0.25rem 1rem; }
   header dt { font-weight: bold; white-space: nowrap; }
   nav ul { display: flex; flex-wrap: wrap; gap: 0.5rem; list-style: none; padding: 0; }
