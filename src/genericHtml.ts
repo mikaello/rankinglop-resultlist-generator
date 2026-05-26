@@ -1,5 +1,6 @@
 import {
 	BODY_CUSTOM_CSS,
+	THEME_TOGGLE_SCRIPT,
 	createResultListNav,
 	createResultListSections,
 } from "./body.ts";
@@ -45,11 +46,13 @@ export const createGenericResultListHtml = (
   <style>${BODY_CUSTOM_CSS}</style>
 </head>
 <body>
+  <button id="theme-toggle" aria-label="Bytt tema">🌙</button>
   ${headerHtml}
   ${navHtml}
   <main>
     ${sectionsHtml}
   </main>
+  ${THEME_TOGGLE_SCRIPT}
 </body>
 </html>`;
 };
