@@ -1,10 +1,10 @@
-import { unzipSync, inflateSync } from "fflate";
+import { inflateSync, unzipSync } from "fflate";
 
 function u16(d: Uint8Array, o: number) {
 	return d[o] | (d[o + 1] << 8);
 }
 function u32(d: Uint8Array, o: number) {
-	return ((d[o] | (d[o + 1] << 8) | (d[o + 2] << 16) | (d[o + 3] << 24)) >>> 0);
+	return (d[o] | (d[o + 1] << 8) | (d[o + 2] << 16) | (d[o + 3] << 24)) >>> 0;
 }
 function u64(d: Uint8Array, o: number) {
 	return u32(d, o) + u32(d, o + 4) * 0x100000000;
@@ -39,7 +39,9 @@ function extractFromLocalHeaders(data: Uint8Array): Record<string, Uint8Array> {
 		let su = u32(data, i + 22);
 		const fnLen = u16(data, i + 26);
 		const exLen = u16(data, i + 28);
-		const fileName = new TextDecoder().decode(data.subarray(i + 30, i + 30 + fnLen));
+		const fileName = new TextDecoder().decode(
+			data.subarray(i + 30, i + 30 + fnLen),
+		);
 
 		if (sc === 0xffffffff || su === 0xffffffff) {
 			let ei = i + 30 + fnLen;
@@ -49,8 +51,13 @@ function extractFromLocalHeaders(data: Uint8Array): Record<string, Uint8Array> {
 				const len = u16(data, ei + 2);
 				if (tag === 0x0001) {
 					let ej = ei + 4;
-					if (su === 0xffffffff && ej + 8 <= eiEnd) { su = u64(data, ej); ej += 8; }
-					if (sc === 0xffffffff && ej + 8 <= eiEnd) { sc = u64(data, ej); }
+					if (su === 0xffffffff && ej + 8 <= eiEnd) {
+						su = u64(data, ej);
+						ej += 8;
+					}
+					if (sc === 0xffffffff && ej + 8 <= eiEnd) {
+						sc = u64(data, ej);
+					}
 					break;
 				}
 				ei += 4 + len;
@@ -61,10 +68,9 @@ function extractFromLocalHeaders(data: Uint8Array): Record<string, Uint8Array> {
 		if (compression === 0) {
 			result[fileName] = data.slice(dataStart, dataStart + sc);
 		} else if (compression === 8) {
-			result[fileName] = inflateSync(
-				data.subarray(dataStart, dataStart + sc),
-				{ out: new Uint8Array(su) },
-			);
+			result[fileName] = inflateSync(data.subarray(dataStart, dataStart + sc), {
+				out: new Uint8Array(su),
+			});
 		}
 		i = dataStart + sc;
 	}
@@ -94,7 +100,9 @@ export async function readXmlFromFile(
 	}
 
 	const entries = extractZip(bytes);
-	const xmlKey = Object.keys(entries).find((k) => k.toLowerCase().endsWith(".xml"));
+	const xmlKey = Object.keys(entries).find((k) =>
+		k.toLowerCase().endsWith(".xml"),
+	);
 	if (!xmlKey) {
 		throw new Error("Ingen .xml-fil funnet i zip-arkivet.");
 	}

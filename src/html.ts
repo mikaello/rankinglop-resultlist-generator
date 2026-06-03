@@ -1,8 +1,8 @@
 import {
 	BODY_CUSTOM_CSS,
-	THEME_TOGGLE_SCRIPT,
 	createResultListNav,
 	createResultListSections,
+	THEME_TOGGLE_SCRIPT,
 } from "./body.ts";
 import { escapeHtml } from "./escapeHtml.ts";
 import { createResultListHeader } from "./generateResultListHeader.ts";

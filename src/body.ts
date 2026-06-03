@@ -174,9 +174,7 @@ function createSplitTimesTable(
 		(pr) => !pr.result?.[0]?.status || pr.result[0].status === "OK",
 	);
 	const nonOkResults = allPersonResults.filter(
-		(pr) =>
-			pr.result?.[0]?.status &&
-			pr.result[0].status !== "OK",
+		(pr) => pr.result?.[0]?.status && pr.result[0].status !== "OK",
 	);
 
 	const firstWithSplits =
