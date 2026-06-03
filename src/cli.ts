@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 import { readFileSync, writeFileSync } from "node:fs";
 import { createResultListDocument } from "./generateResultList.ts";
 import type { ResultList } from "./model.ts";
