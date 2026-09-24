@@ -53,6 +53,9 @@ function setVal(id: string, val: string): void {
 
 function buildOptionsFromForm(): ResultListOptions {
 	const options: ResultListOptions = {};
+	options.responsive = (
+		document.getElementById("opt-responsive") as HTMLInputElement
+	).checked;
 
 	const title = getVal("opt-title");
 	if (title) options.title = title;
@@ -104,6 +107,8 @@ function buildOptionsFromForm(): ResultListOptions {
 }
 
 function populateFormFromOptions(opts: ResultListOptions): void {
+	(document.getElementById("opt-responsive") as HTMLInputElement).checked =
+		opts.responsive === true;
 	setVal("opt-title", opts.title ?? "");
 	setVal("opt-date", opts.isoDate ?? "");
 	setVal("opt-place", opts.place ?? "");
@@ -193,7 +198,8 @@ function render(): void {
 		{ "amount": 50, "quota": 100 },
 		{ "amount": 80, "quota": 50 }
 	],
-	"rentalDevices": 12
+	"rentalDevices": 12,
+	"responsive": true
 }</code></pre>
 							</article>
 						</dialog>
@@ -259,6 +265,10 @@ function render(): void {
             </label>
           </div>
         </details>
+		<label class="responsive-option" for="opt-responsive">
+			<input type="checkbox" id="opt-responsive" />
+			<span>Mobilvennlig resultatliste<small>Tilpasset visning på telefon, med sveipbare strekktider. Uten avkryssing kan hele siden zoomes.</small></span>
+		</label>
 
         <button id="generate-btn" disabled>Generer resultatliste</button>
       </form>

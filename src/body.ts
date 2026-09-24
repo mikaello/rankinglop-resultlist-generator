@@ -28,7 +28,42 @@ export const BODY_CUSTOM_CSS = `
   .splits-cumul-row td.second-split { color: #3366ff; }
   .splits-table tbody + tbody { border-top: 1px solid var(--pico-table-border-color, #ccc); }
   .time-behind { color: var(--pico-muted-color, #666); font-size: 0.85em; }
+  .splits-scroll { overflow-x: auto; }
   #theme-toggle { position: fixed; top: 0.75rem; right: 0.75rem; font-size: 1.25rem; background: none; border: none; cursor: pointer; padding: 0.25rem; line-height: 1; z-index: 100; }
+`;
+
+export const RESPONSIVE_CSS = `
+  .mobile-results, .split-scroll-hint { display: none; }
+  .results-scroll, .splits-scroll { max-width: 100%; overflow-x: auto; }
+  @media (max-width: 680px) {
+    body { max-width: none; padding: 0 0.75rem; }
+    body > header { padding-top: 2.5rem; }
+    body > header h1 { overflow-wrap: anywhere; }
+    header dl { grid-template-columns: max-content minmax(0, 1fr); gap: 0.4rem 0.6rem; }
+    header dt { margin: 0; }
+    header dd { margin: 0; overflow-wrap: anywhere; }
+    body > nav { display: block; padding: 0 1.75rem; margin: 1rem 0; }
+    nav ul { display: grid; width: 100%; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.4rem; margin: 0; padding: 0; }
+    nav ul li { padding: 0; margin: 0; }
+    nav a { display: block; padding: 0.35rem 0.5rem; border: 1px solid var(--pico-table-border-color, #ccc); border-radius: 0.35rem; }
+    .results-scroll { display: none; }
+    .mobile-results { display: grid; gap: 0.65rem; list-style: none; padding: 0; margin: 0; }
+    .mobile-results li { min-width: 0; margin: 0; padding: 0.75rem; list-style: none; border: 1px solid var(--pico-table-border-color, #ccc); border-radius: 0.5rem; }
+    .mobile-result-main { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 0.25rem 0.75rem; align-items: baseline; }
+    .mobile-result-main strong { overflow-wrap: anywhere; }
+    .mobile-result-rank { font-weight: 700; color: var(--pico-muted-color, #666); }
+    .mobile-result-time { font-variant-numeric: tabular-nums; white-space: nowrap; font-weight: 700; }
+    .mobile-result-club { margin: 0.25rem 0 0; overflow-wrap: anywhere; }
+    .mobile-results dl { display: flex; flex-wrap: wrap; gap: 0.15rem 0.35rem; margin: 0.35rem 0 0; font-size: 0.85rem; color: var(--pico-muted-color, #666); }
+    .mobile-results dt { margin: 0; font-weight: 400; }
+    .mobile-results dd { margin: 0 0.75rem 0 0; font-variant-numeric: tabular-nums; }
+    .split-scroll-hint { display: block; margin: 0 0 0.35rem; color: var(--pico-muted-color, #666); font-size: 0.85rem; }
+    .splits-scroll { -webkit-overflow-scrolling: touch; }
+    .splits-table { width: max-content; min-width: 100%; }
+    .splits-table th:nth-child(1), .splits-table tbody tr:first-child td:nth-child(1) { position: sticky; left: 0; z-index: 2; background: var(--pico-background-color, #fff); }
+    .splits-table th:nth-child(2), .splits-table tbody tr:first-child td:nth-child(2) { position: sticky; left: 3.25rem; z-index: 2; background: var(--pico-background-color, #fff); width: 9rem; min-width: 9rem; max-width: 9rem; overflow: hidden; text-overflow: ellipsis; }
+    .splits-table th:nth-child(1), .splits-table tbody tr:first-child td:nth-child(1) { width: 3.25rem; min-width: 3.25rem; }
+  }
 `;
 
 export const THEME_TOGGLE_SCRIPT = `
@@ -107,10 +142,18 @@ function statusCssClass(status: ResultStatus | undefined): string {
 	}
 }
 
-function createClassResultRows(classResult: ClassResult): string {
+function createClassResultRows(
+	classResult: ClassResult,
+	responsive: boolean,
+): {
+	rows: string;
+	cards: string;
+} {
 	const lengthKm = getCourseLengthKm(classResult);
 	const finishers: string[] = [];
 	const nonFinishers: string[] = [];
+	const mobileFinishers: string[] = [];
+	const mobileNonFinishers: string[] = [];
 
 	for (const pr of classResult.personResult ?? []) {
 		const result = pr.result?.[0];
@@ -133,6 +176,12 @@ function createClassResultRows(classResult: ClassResult): string {
 			finishers.push(
 				`<tr><td>${pos}</td><td>${name}</td><td>${club}</td><td>${time}</td><td>${behind}</td><td>${kmTid}</td></tr>`,
 			);
+			if (responsive)
+				mobileFinishers.push(`<li>
+          <div class="mobile-result-main"><span><span class="mobile-result-rank">${pos === "–" ? pos : `${pos}.`}</span> <strong>${name}</strong></span><span class="mobile-result-time">${time}</span></div>
+          <p class="mobile-result-club">${club}</p>
+          <dl><dt>Diff</dt><dd>${behind || "–"}</dd><dt>km-tid</dt><dd>${kmTid}</dd></dl>
+        </li>`);
 		} else {
 			const cssClass = statusCssClass(status);
 			const label = escapeHtml(statusLabel(status));
@@ -141,10 +190,18 @@ function createClassResultRows(classResult: ClassResult): string {
 			nonFinishers.push(
 				`<tr class="${cssClass}"><td>${label}</td><td>${name}</td><td>${club}</td><td>${time}</td><td>–</td><td>–</td></tr>`,
 			);
+			if (responsive)
+				mobileNonFinishers.push(`<li class="${cssClass}">
+          <div class="mobile-result-main"><span><span class="mobile-result-rank">${label}</span> <strong>${name}</strong></span><span class="mobile-result-time">${time}</span></div>
+          <p class="mobile-result-club">${club}</p>
+        </li>`);
 		}
 	}
 
-	return [...finishers, ...nonFinishers].join("\n");
+	return {
+		rows: [...finishers, ...nonFinishers].join("\n"),
+		cards: [...mobileFinishers, ...mobileNonFinishers].join("\n"),
+	};
 }
 
 function splitLegLabel(i: number, n: number): string {
@@ -166,6 +223,7 @@ function classHasSplitTimes(classResult: ClassResult): boolean {
 function createSplitTimesTable(
 	classResult: ClassResult,
 	sectionId: string,
+	responsive: boolean,
 ): string {
 	if (!classHasSplitTimes(classResult)) return "";
 
@@ -321,7 +379,8 @@ function createSplitTimesTable(
 	return `
   <section id="${sectionId}">
     <h3>Strekktider ${escapeHtml(getClassName(classResult))}</h3>
-    <div style="overflow-x: auto;">
+    ${responsive ? '<p class="split-scroll-hint">Sveip sidelengs for å se alle strekktider.</p>' : ""}
+    <div class="splits-scroll" tabindex="0" role="region" aria-label="Strekktider ${escapeHtml(getClassName(classResult))}">
       <table class="splits-table">
         <thead>
           <tr><th rowspan="2">Plass</th><th rowspan="2">Navn</th>${headerCells}<th rowspan="2">Totaltid</th></tr>
@@ -333,23 +392,34 @@ function createSplitTimesTable(
   </section>`;
 }
 
-function createClassSection(classResult: ClassResult, index: number): string {
+function createClassSection(
+	classResult: ClassResult,
+	index: number,
+	responsive: boolean,
+): string {
 	const className = escapeHtml(getClassName(classResult));
 	const lengthKm = getCourseLengthKm(classResult);
-	const rows = createClassResultRows(classResult);
-	const splitsTable = createSplitTimesTable(classResult, `splits-${index}`);
+	const { rows, cards } = createClassResultRows(classResult, responsive);
+	const splitsTable = createSplitTimesTable(
+		classResult,
+		`splits-${index}`,
+		responsive,
+	);
 
 	return `
   <section id="class-${index}">
     <h2>Resultater ${className} (${lengthKm} km)</h2>
-    <table>
+    <div class="results-scroll">
+      <table>
       <thead>
         <tr><th>Plass</th><th>Navn</th><th>Klubb</th><th>Tid</th><th>Diff</th><th>km-tid</th></tr>
       </thead>
       <tbody>
         ${rows}
       </tbody>
-    </table>
+      </table>
+    </div>
+    ${responsive ? `<ul class="mobile-results">${cards}</ul>` : ""}
   </section>
   ${splitsTable}`;
 }
@@ -383,7 +453,10 @@ export const createResultListNav = (resultList: ResultList): string => {
  * Render the body sections (class result tables + split time tables) for all classes.
  * Does not include the surrounding <main>, navigation, or document header.
  */
-export const createResultListSections = (resultList: ResultList): string =>
+export const createResultListSections = (
+	resultList: ResultList,
+	responsive = false,
+): string =>
 	(resultList.classResult ?? [])
-		.map((cr, i) => createClassSection(cr, i))
+		.map((cr, i) => createClassSection(cr, i, responsive))
 		.join("\n");

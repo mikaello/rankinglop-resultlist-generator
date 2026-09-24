@@ -4,8 +4,7 @@
 [![license](https://img.shields.io/npm/l/@mikaello/rankinglop-resultlist-generator)](./LICENSE)
 
 A command-line tool **and library** that converts an IOF 3.0 XML result list
-(as exported by Otime) into a self-contained HTML page
-with modern, responsive styling.
+(as exported by Otime) into a self-contained HTML page.
 Built for the [GeoForm Rankingløp](https://ilgeoform.no) series.
 
 ## Web app
@@ -14,6 +13,8 @@ A browser-based version is available at
 <https://mikaello.github.io/rankinglop-resultlist-generator/>.
 Upload an IOF 3.0 XML file, fill in optional event metadata, and download the
 generated HTML — no installation required.
+Leave “Mobilvennlig resultatliste” unchecked for a full-page layout that can be pinched to zoom on a phone.
+Check it for compact result cards and horizontally scrollable split times on phones.
 
 ## Requirements
 
@@ -80,6 +81,7 @@ rankinglop --input result.xml --output result.html
   "map": "Solbergvann",
   "organiserClub": "IL GeoForm",
   "organiserPersons": ["Ola Nordmann"],
+  "responsive": true,
   "rentalDevices": 8,
   "yearDistribution": {
     "adults": 80,
@@ -92,6 +94,7 @@ rankinglop --input result.xml --output result.html
 
 All fields are optional and fall back to sensible defaults or values from the
 XML itself.
+`responsive` defaults to `false` and works in the CLI config and library API too.
 
 ## Programmatic API
 
@@ -191,4 +194,3 @@ npm test
 ## License
 
 GPL-3.0 — see [LICENSE](LICENSE).
-
