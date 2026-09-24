@@ -9,7 +9,7 @@ No installation required — visit the live site:
 Upload an IOF 3.0 XML result list (as exported by Otime), fill in optional event
 metadata, and download a self-contained HTML result page.
 All processing happens client-side; no data is sent to a server.
-The “Mobilvennlig resultatliste” checkbox produces a compact phone layout with swipeable split times.
+The “Mobilvennlig resultatliste” checkbox starts checked and produces a compact phone layout with swipeable split times.
 Without it, the downloaded page keeps the full result tables and allows pinch zoom on phones.
 
 ## Development

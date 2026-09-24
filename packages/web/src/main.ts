@@ -108,7 +108,7 @@ function buildOptionsFromForm(): ResultListOptions {
 
 function populateFormFromOptions(opts: ResultListOptions): void {
 	(document.getElementById("opt-responsive") as HTMLInputElement).checked =
-		opts.responsive === true;
+		opts.responsive ?? true;
 	setVal("opt-title", opts.title ?? "");
 	setVal("opt-date", opts.isoDate ?? "");
 	setVal("opt-place", opts.place ?? "");
@@ -266,7 +266,7 @@ function render(): void {
           </div>
         </details>
 		<label class="responsive-option" for="opt-responsive">
-			<input type="checkbox" id="opt-responsive" />
+			<input type="checkbox" id="opt-responsive" checked />
 			<span>Mobilvennlig resultatliste<small>Tilpasset visning på telefon, med sveipbare strekktider. Uten avkryssing kan hele siden zoomes.</small></span>
 		</label>
 
