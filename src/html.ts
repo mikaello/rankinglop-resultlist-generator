@@ -2,6 +2,7 @@ import {
 	BODY_CUSTOM_CSS,
 	createResultListNav,
 	createResultListSections,
+	RESPONSIVE_CSS,
 	THEME_TOGGLE_SCRIPT,
 } from "./body.ts";
 import { escapeHtml } from "./escapeHtml.ts";
@@ -31,16 +32,20 @@ export const createResultListHtml = (
 
 	const headerHtml = createResultListHeader(options, resultList);
 	const navHtml = createResultListNav(resultList);
-	const sectionsHtml = createResultListSections(resultList);
+	const sectionsHtml = createResultListSections(resultList, options.responsive);
+	const viewport = options.responsive
+		? '<meta name="viewport" content="width=device-width, initial-scale=1">'
+		: "";
 
 	return `<!DOCTYPE html>
 <html lang="nb">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  ${viewport}
   <title>${title}</title>
   <style>${picoCSS}</style>
   <style>${BODY_CUSTOM_CSS}</style>
+  ${options.responsive ? `<style>${RESPONSIVE_CSS}</style>` : ""}
 </head>
 <body>
   <button id="theme-toggle" aria-label="Bytt tema">🌙</button>

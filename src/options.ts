@@ -10,6 +10,9 @@ export type YearDistribution = {
 };
 
 export type ResultListOptions = {
+	/** Use a phone-friendly layout for results and split times. Defaults to the zoomable desktop layout. */
+	responsive?: boolean;
+
 	/** Title of this race */
 	title?: string;
 
