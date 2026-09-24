@@ -34,6 +34,8 @@ describe("mobile result lists", () => {
 		it(`${name}: includes the compact results and scrollable splits when selected`, () => {
 			const html = render(resultList, { responsive: true }, picoCSS);
 			assert.match(html, /width=device-width, initial-scale=1/);
+			assert.match(html, /<table class="results-table">/);
+			assert.doesNotMatch(html, /results-scroll/);
 			assert.match(html, /<ul class="mobile-results">/);
 			assert.match(html, /Christian Vogelsang/);
 			assert.match(html, /<dt>Diff<\/dt>/);

@@ -34,7 +34,6 @@ export const BODY_CUSTOM_CSS = `
 
 export const RESPONSIVE_CSS = `
   .mobile-results, .split-scroll-hint { display: none; }
-  .results-scroll, .splits-scroll { max-width: 100%; overflow-x: auto; }
   @media (max-width: 680px) {
     body { max-width: none; padding: 0 0.75rem; }
     body > header { padding-top: 2.5rem; }
@@ -46,7 +45,7 @@ export const RESPONSIVE_CSS = `
     nav ul { display: grid; width: 100%; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.4rem; margin: 0; padding: 0; }
     nav ul li { padding: 0; margin: 0; }
     nav a { display: block; padding: 0.35rem 0.5rem; border: 1px solid var(--pico-table-border-color, #ccc); border-radius: 0.35rem; }
-    .results-scroll { display: none; }
+    .results-table { display: none; }
     .mobile-results { display: grid; gap: 0.65rem; list-style: none; padding: 0; margin: 0; }
     .mobile-results li { min-width: 0; margin: 0; padding: 0.75rem; list-style: none; border: 1px solid var(--pico-table-border-color, #ccc); border-radius: 0.5rem; }
     .mobile-result-main { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 0.25rem 0.75rem; align-items: baseline; }
@@ -58,7 +57,7 @@ export const RESPONSIVE_CSS = `
     .mobile-results dt { margin: 0; font-weight: 400; }
     .mobile-results dd { margin: 0 0.75rem 0 0; font-variant-numeric: tabular-nums; }
     .split-scroll-hint { display: block; margin: 0 0 0.35rem; color: var(--pico-muted-color, #666); font-size: 0.85rem; }
-    .splits-scroll { -webkit-overflow-scrolling: touch; }
+    .splits-scroll { max-width: 100%; -webkit-overflow-scrolling: touch; }
     .splits-table { width: max-content; min-width: 100%; }
     .splits-table th:nth-child(1), .splits-table tbody tr:first-child td:nth-child(1) { position: sticky; left: 0; z-index: 2; background: var(--pico-background-color, #fff); }
     .splits-table th:nth-child(2), .splits-table tbody tr:first-child td:nth-child(2) { position: sticky; left: 3.25rem; z-index: 2; background: var(--pico-background-color, #fff); width: 9rem; min-width: 9rem; max-width: 9rem; overflow: hidden; text-overflow: ellipsis; }
@@ -409,16 +408,14 @@ function createClassSection(
 	return `
   <section id="class-${index}">
     <h2>Resultater ${className} (${lengthKm} km)</h2>
-    <div class="results-scroll">
-      <table>
+    <table${responsive ? ' class="results-table"' : ""}>
       <thead>
         <tr><th>Plass</th><th>Navn</th><th>Klubb</th><th>Tid</th><th>Diff</th><th>km-tid</th></tr>
       </thead>
       <tbody>
         ${rows}
       </tbody>
-      </table>
-    </div>
+    </table>
     ${responsive ? `<ul class="mobile-results">${cards}</ul>` : ""}
   </section>
   ${splitsTable}`;
