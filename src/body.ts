@@ -33,7 +33,7 @@ export const BODY_CUSTOM_CSS = `
 `;
 
 export const RESPONSIVE_CSS = `
-  .mobile-results, .split-scroll-hint { display: none; }
+  .mobile-results, .split-scroll-hint, .back-to-top { display: none; }
   @media (max-width: 680px) {
     body { max-width: none; padding: 0 0.75rem; }
     body > header { padding-top: 2.5rem; }
@@ -57,6 +57,7 @@ export const RESPONSIVE_CSS = `
     .mobile-results dt { margin: 0; font-weight: 400; }
     .mobile-results dd { margin: 0 0.75rem 0 0; font-variant-numeric: tabular-nums; }
     .split-scroll-hint { display: block; margin: 0 0 0.35rem; color: var(--pico-muted-color, #666); font-size: 0.85rem; }
+    .back-to-top { display: block; margin: 0.75rem 0 1.5rem; text-align: right; font-size: 0.9rem; }
     .splits-scroll { max-width: 100%; -webkit-overflow-scrolling: touch; }
     .splits-table { width: max-content; min-width: 100%; }
     .splits-table th:nth-child(1), .splits-table tbody tr:first-child td:nth-child(1) { position: sticky; left: 0; z-index: 2; background: var(--pico-background-color, #fff); }
@@ -65,6 +66,11 @@ export const RESPONSIVE_CSS = `
     .splits-table th:nth-child(1) { font-size: 0.75em; }
   }
 `;
+
+const createBackToTopLink = (responsive: boolean): string =>
+	responsive
+		? '<p class="back-to-top"><a href="#top">↑ Til toppen</a></p>'
+		: "";
 
 export const THEME_TOGGLE_SCRIPT = `
 <script>
@@ -389,6 +395,7 @@ function createSplitTimesTable(
         ${tbodies}
       </table>
     </div>
+    ${createBackToTopLink(responsive)}
   </section>`;
 }
 
@@ -418,6 +425,7 @@ function createClassSection(
       </tbody>
     </table>
     ${responsive ? `<ul class="mobile-results">${cards}</ul>` : ""}
+    ${createBackToTopLink(responsive)}
   </section>
   ${splitsTable}`;
 }

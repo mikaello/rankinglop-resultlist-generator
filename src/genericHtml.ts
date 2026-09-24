@@ -50,7 +50,7 @@ export const createGenericResultListHtml = (
   <style>${BODY_CUSTOM_CSS}</style>
   ${options.responsive ? `<style>${RESPONSIVE_CSS}</style>` : ""}
 </head>
-<body>
+<body id="top">
   <button id="theme-toggle" aria-label="Bytt tema">🌙</button>
   ${headerHtml}
   ${navHtml}
