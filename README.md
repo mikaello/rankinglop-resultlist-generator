@@ -13,8 +13,8 @@ A browser-based version is available at
 <https://mikaello.github.io/rankinglop-resultlist-generator/>.
 Upload an IOF 3.0 XML file, fill in optional event metadata, and download the
 generated HTML — no installation required.
-Leave “Mobilvennlig resultatliste” unchecked for a full-page layout that can be pinched to zoom on a phone.
-Check it for compact result cards and horizontally scrollable split times on phones.
+“Mobilvennlig resultatliste” starts checked in the web app and produces compact result cards and horizontally scrollable split times on phones.
+Uncheck it for a full-page layout that can be pinched to zoom on a phone.
 
 ## Requirements
 

@@ -60,8 +60,9 @@ export const RESPONSIVE_CSS = `
     .splits-scroll { max-width: 100%; -webkit-overflow-scrolling: touch; }
     .splits-table { width: max-content; min-width: 100%; }
     .splits-table th:nth-child(1), .splits-table tbody tr:first-child td:nth-child(1) { position: sticky; left: 0; z-index: 2; background: var(--pico-background-color, #fff); }
-    .splits-table th:nth-child(2), .splits-table tbody tr:first-child td:nth-child(2) { position: sticky; left: 3.25rem; z-index: 2; background: var(--pico-background-color, #fff); width: 9rem; min-width: 9rem; max-width: 9rem; overflow: hidden; text-overflow: ellipsis; }
-    .splits-table th:nth-child(1), .splits-table tbody tr:first-child td:nth-child(1) { width: 3.25rem; min-width: 3.25rem; }
+    .splits-table th:nth-child(2), .splits-table tbody tr:first-child td:nth-child(2) { position: sticky; left: 2.5rem; z-index: 2; background: var(--pico-background-color, #fff); width: 7rem; min-width: 7rem; max-width: 7rem; white-space: normal; overflow-wrap: anywhere; line-height: 1.2; }
+    .splits-table th:nth-child(1), .splits-table tbody tr:first-child td:nth-child(1) { width: 2.5rem; min-width: 2.5rem; max-width: 2.5rem; padding-inline: 0.15rem; text-align: center; }
+    .splits-table th:nth-child(1) { font-size: 0.75em; }
   }
 `;
 
