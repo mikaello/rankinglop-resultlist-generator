@@ -48,7 +48,7 @@
 	"license": "GPL-3.0",
 	"devDependencies": {
 		"@biomejs/biome": "2.5.15",
-		"@types/node": "25.9.8",
+		"@types/node": "25.9.9",
 		"esbuild": "0.28.2",
 		"tsx": "4.23.15",
 		"typescript": "7.0.2"
